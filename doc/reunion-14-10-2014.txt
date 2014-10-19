@@ -1,0 +1,61 @@
+﻿*** contacts :
+gautier boeda (corei5 : nb coeurs logiques / IGP, Nvidia GTX670 : infos)
+steven le rouzic (corei7 : 8 coeurs/IGP, Nvidia 740M : )
+
+steven.lerouzic@ecole.ensicaen.fr
+boeda@ecole.ensicaen.fr
+
+ADCIS
+3 r Martin Luther King 14280 SAINT CONTEST
+http://www.adcis.net/
+gregory.dagniaux@adcis.net
+
+*** sujet :
+- Titre : Implémentation de 5 fonctions standards de traitement d'images sur processeur graphique
+
+- Description : Implémentation de 5 fonctions standards de traitement d'images sur processeur graphique de type Nvidia ou ATI.
+
+Les 5 fonctions proposées sont Inverse d'une image, addition entre deux images, convolution 3*3, erosion 3*3 et seuillage.
+
+Le but est de tirer de l'architecture hautement parallèle du composant graphique du PC
+
+*** questions :
+- OS côté host (linux/windows) ? Linux
+- Technos hard (Intel, Nvidia, ATI) ? Intel, NVidia
+- Technos soft ou API's (openCL, Intell TBB, CUDA ...) ? CUDA et "?" (Intel)
+- Benchmark ? 
+
+*** plan d'exécution :
+- +++ : recherche : doc sur techno GPU, Intel et NVidia (compréhension architecture GPU et vocabulaires propre à chaque fondeurs), familles de GPU chez NVidia (évolutions ...), CUDA, API's Intel ...
+
+- +++ : installation et prise en main des outils
+
+- ++ : Traitement d'image, outils de prototypage ? Matlab/Simulink ? ecriture en pseudo Matlab !
+
+- +++ : Prototypage algorithmes sur GPP en C canonique (aucune optimisation). Fixer données d'I/O. 
+
+- +++ : outils de mesure (vTunes, perf stat ...) ? 
+
+- +++ : Développement des procédures de test et si possible les automatiser ces procédures.
+
+- + : optimiser l'algo sur GPP (programmation parallèle, Intel TBB) ?
+
+- +++ : parallèlisation des algos sur GPU (IGP Intel, NVidia ..)
+
+- +++ : Benchmark / comparatif de performance !
+
+
+*** kick off :
+- plan d'exécution (gantt +25% de marge), ressources, créer une par tâche (voir sous tâche) : priorité, numéro, descriptif exhaustif, ressource, I/O, points de contrôle / livrables (fin octobre : outils de prototypage, 7 novembre : plan complet, mi-fin-novembre : proto + algo + données IO + test sur GPP sans opti, fin-décembre : opti GPP, fin janvier : doc techno/Archi  NVidia + Intel + API, fin-mars : algo optimisés sur GPU), risques (prise en main des outils, carte graphique morte ...).
+
+*** autre :
+- coding rules ? C kernel Linux
+- RDV sous doodle + confirmation 
+- objet mail : projet 2A info - gpu - xxxxx
+- documents/archive : projet2AInfo-gpu-xxxx-10-09-14
+- mettre tous les interlocuteurs en copie des mails
+
+
+
+
+

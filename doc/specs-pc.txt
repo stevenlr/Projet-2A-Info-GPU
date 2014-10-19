@@ -1,0 +1,22 @@
+Gautier Boëda :
+
+Core i5 3570K :
+4 cores, 4 threads
+IGP : HD Graphics 4000
+
+GTX 670 :
+Architecture Kepler, OpenCL 1.2
+Mémoire vidéo : 2Go, DDR3/GDDR5
+http://www.nvidia.fr/object/geforce-gtx-670-fr.html#pdpContent=2
+
+Steven Le Rouzic :
+
+Core i7-4700HQ:
+4 cores, 8 threads
+IGP : HD Graphics 4600
+http://ark.intel.com/products/75116
+
+GT 740M:
+Architecture Kepler, OpenCL 1.1
+Mémoire vidéo : 2Go, DDR3/GDDR5
+http://www.geforce.com/hardware/notebook-gpus/geforce-gt-740m/specifications
