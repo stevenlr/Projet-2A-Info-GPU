@@ -1,7 +1,7 @@
 CXX=g++
 BIN=test
-LDFLAGS=-lpandore -L/usr/share/pandore/lib
-CXXFLAGS=-I/usr/share/pandore/include
+LDFLAGS=-lpandore -LC:\pandore\lib
+CXXFLAGS=-IC:\pandore\include
 
 .PHONY: all clean
 
