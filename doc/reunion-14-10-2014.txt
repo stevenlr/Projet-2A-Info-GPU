@@ -20,7 +20,7 @@ Les 5 fonctions proposées sont Inverse d'une image, addition entre deux images,
 Le but est de tirer de l'architecture hautement parallèle du composant graphique du PC
 
 *** questions :
-- OS côté host (linux/windows) ? Linux
+- OS côté host (linux/windows) ? Windows
 - Technos hard (Intel, Nvidia, ATI) ? Intel, NVidia
 - Technos soft ou API's (openCL, Intell TBB, CUDA ...) ? CUDA et "?" (Intel)
 - Benchmark ? 
