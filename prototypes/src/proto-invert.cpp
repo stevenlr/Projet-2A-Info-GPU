@@ -10,7 +10,7 @@ using namespace pandore;
 #define FINC 1
 #define FOUTC 1
 
-namespace Identity {
+namespace Invert {
 Errc Operator(const Imc2duc &src, Imc2duc &dst)
 {
 	Long w = src.Width();
@@ -18,9 +18,9 @@ Errc Operator(const Imc2duc &src, Imc2duc &dst)
 
 	for (Long y = 0; y < h; ++y) {
 		for (Long x = 0; x < w; ++x) {
-			dst[0][y][x] = src[0][y][x];
-			dst[1][y][x] = src[1][y][x];
-			dst[2][y][x] = src[2][y][x];
+			dst[0][y][x] = 255 - src[0][y][x];
+			dst[1][y][x] = 255 - src[1][y][x];
+			dst[2][y][x] = 255 - src[2][y][x];
 		}
 	}
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		 objin, objs, objout, objd, parv, USAGE);
 
 	if (objs[0]->Type() != Po_Imc2duc) {
-		std::cout << "Expected object of type Imc2duc (colo, 2D, uchar)" << std::endl;
+		std::cout << "Expected object of type Imc2duc (color, 2D, uchar)" << std::endl;
 		return 1;
 	}
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	objd[0] = new Imc2duc(src->Props());
 	Imc2duc* const dst = (Imc2duc *) objd[0];
 
-	Errc result = Identity::Operator(*src, *dst);
+	Errc result = Invert::Operator(*src, *dst);
 
 	WriteArgs(argc, argv, PARC, FINC, FOUTC, &mask,
 		  objin, objs, objout, objd);
