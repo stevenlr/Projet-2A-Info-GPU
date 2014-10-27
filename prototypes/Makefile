@@ -8,7 +8,7 @@ IMGSPNG=$(patsubst %.pan, img/%.png, $(IMGSPAN))
 
 .PHONY: all clean cleanpan convertimages
 
-all: bin Lenna.pan DS.pan binary.pan $(BINS)
+all: bin src-Lenna.pan src-DS.pan src-binary.pan $(BINS)
 
 bin:
 	mkdir bin
