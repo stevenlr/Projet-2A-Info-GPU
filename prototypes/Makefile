@@ -1,6 +1,6 @@
 CXX=g++
 LDFLAGS=-lpandore -LC:\pandore\lib
-CXXFLAGS=-IC:\pandore\include
+CXXFLAGS=-IC:\pandore\include -g
 SRC=$(wildcard src/*.cpp)
 BINS=$(patsubst src/%.cpp, bin/%.exe, $(SRC))
 IMGSPAN=$(wildcard *.pan)
