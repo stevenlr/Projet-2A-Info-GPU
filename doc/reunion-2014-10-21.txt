@@ -1,0 +1,17 @@
+***Compte rendu réunion 21/10/2014
+
+Environnement : Windows
+
+Se baser sur des Matrices 3x3 (petites) pour commencer (Pour les benchs, il faudra aller épuiser le GPU)
+
+Portable ou Optimisation ?  --> Faire des benchs avec "Avantages / Inconvénients" pour chaque
+
+Ordre d'exécution :
+1) GPU -> NVidia -> CUDA
+2) Intel IGP
+
+Contacter "Emmanuelle Cagmiot"
+- Appel + RDV
+- Questions => Avantages Inconvénients des APIs...
+
+Pas de format d'image précis côté industriel.

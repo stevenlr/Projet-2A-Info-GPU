@@ -1,0 +1,12 @@
+***Compte rendu mail 28/10/2014 (ADCIS)
+
+Quels formats d'image utilisez-vous :
+	Il est un peu tôt pour aborder la question du format. Ils ont leur propre structure interne pour les données.
+
+Proposition d'ordre d'exécution du projet (côté ADCIS) :
+	1) Tests sur nos données (format qu'on choisit) en comparant (bench) sur CPU et sur GPU (Diff CPU/GPU)
+	2) => A définir
+
+Travailler avec des images monochromes => Prototypages convertis.
+
+Réunion fin novembre avec Grégory Dagniaux.
