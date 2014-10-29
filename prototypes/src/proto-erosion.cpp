@@ -11,7 +11,7 @@ using namespace pandore;
 #define FOUTC 1
 
 namespace Erosion {
-Uchar erode(const Imc2duc &src, Long x, Long y, Long b, Long radius)
+Uchar erode(const Img2duc &src, Long x, Long y, Long radius)
 {
 	Long w = src.Width();
 	Long h = src.Height();
@@ -24,7 +24,7 @@ Uchar erode(const Imc2duc &src, Long x, Long y, Long b, Long radius)
 				continue;
 			}
 
-			Uchar value = src[b][y2][x2];
+			Uchar value = src[y2][x2];
 
 			if (minvalue > value) {
 				minvalue = value;
@@ -35,16 +35,14 @@ Uchar erode(const Imc2duc &src, Long x, Long y, Long b, Long radius)
 	return minvalue;
 }
 
-Errc Operator(const Imc2duc &src, Imc2duc &dst, Long radius)
+Errc Operator(const Img2duc &src, Img2duc &dst, Long radius)
 {
 	Long w = src.Width();
 	Long h = src.Height();
 
 	for (Long y = 0; y < h; ++y) {
 		for (Long x = 0; x < w; ++x) {
-			dst[0][y][x] = erode(src, x, y, 0, radius);
-			dst[1][y][x] = erode(src, x, y, 1, radius);
-			dst[2][y][x] = erode(src, x, y, 2, radius);
+			dst[y][x] = erode(src, x, y, radius);
 		}
 	}
 
@@ -64,8 +62,8 @@ int main(int argc, char *argv[])
 	ReadArgs(argc, argv, PARC, FINC, FOUTC, &mask,
 		 objin, objs, objout, objd, parv, USAGE);
 
-	if (objs[0]->Type() != Po_Imc2duc) {
-		std::cout << "Expected object of type Imc2duc (color, 2D, uchar)" << std::endl;
+	if (objs[0]->Type() != Po_Img2duc) {
+		std::cout << "Expected object of type Img2duc (grayscale, 2D, uchar)" << std::endl;
 		return 1;
 	}
 
@@ -76,10 +74,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	Imc2duc* const src = (Imc2duc *) objs[0];
+	Img2duc* const src = (Img2duc *) objs[0];
 
-	objd[0] = new Imc2duc(src->Props());
-	Imc2duc* const dst = (Imc2duc *) objd[0];
+	objd[0] = new Img2duc(src->Props());
+	Img2duc* const dst = (Img2duc *) objd[0];
 
 	Errc result = Erosion::Operator(*src, *dst, radius);
 

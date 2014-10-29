@@ -15,7 +15,7 @@ using namespace pandore;
  * We'll have to discuss the output format.
  */
 namespace Add {
-Errc Operator(const Imc2duc &src1, const Imc2duc &src2, Imc2duc &dst)
+Errc Operator(const Img2duc &src1, const Img2duc &src2, Img2duc &dst)
 {
 	Long w = src1.Width();
 	Long h = src1.Height();
@@ -27,10 +27,8 @@ Errc Operator(const Imc2duc &src1, const Imc2duc &src2, Imc2duc &dst)
 
 	for (Long y = 0; y < h; ++y) {
 		for (Long x = 0; x < w; ++x) {
-			for (Long c = 0; c < 3; ++c) {
-				Long sum = src1[c][y][x] + src2[c][y][x];
-				dst[c][y][x] = (sum > 255) ? 255 : sum;
-			}
+			Long sum = src1[y][x] + src2[y][x];
+			dst[y][x] = (sum > 255) ? 255 : sum;
 		}
 	}
 
@@ -50,16 +48,16 @@ int main(int argc, char *argv[])
 	ReadArgs(argc, argv, PARC, FINC, FOUTC, &mask,
 		 objin, objs, objout, objd, parv, USAGE);
 
-	if (objs[0]->Type() != Po_Imc2duc || objs[1]->Type() != Po_Imc2duc) {
-		std::cout << "Expected objects of type Imc2duc (color, 2D, uchar)" << std::endl;
+	if (objs[0]->Type() != Po_Img2duc || objs[1]->Type() != Po_Img2duc) {
+		std::cout << "Expected objects of type Img2duc (grayscale, 2D, uchar)" << std::endl;
 		return 1;
 	}
 
-	Imc2duc* const src1 = (Imc2duc *) objs[0];
-	Imc2duc* const src2 = (Imc2duc *) objs[1];
+	Img2duc* const src1 = (Img2duc *) objs[0];
+	Img2duc* const src2 = (Img2duc *) objs[1];
 
-	objd[0] = new Imc2duc(src1->Props());
-	Imc2duc* const dst = (Imc2duc *) objd[0];
+	objd[0] = new Img2duc(src1->Props());
+	Img2duc* const dst = (Img2duc *) objd[0];
 
 	Errc result = Add::Operator(*src1, *src2, *dst);
 

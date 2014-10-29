@@ -18,6 +18,7 @@ bin/%.exe: src/%.cpp
 
 %.pan: %.png
 	pany2pan $^ $@
+	prgb2gray 0.299 0.587 0.114 $@ $@
 
 clean:
 	rm -rf bin $(BINS)

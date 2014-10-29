@@ -69,7 +69,7 @@ void delete_kernel(Kernel kernel)
 }
 
 namespace Convolution {
-Uchar convolution(const Imc2duc &src, Kernel kernel, Long edge_mode, Long b, Long x, Long y)
+Uchar convolution(const Img2duc &src, Kernel kernel, Long edge_mode, Long x, Long y)
 {
 	Long kernel_radius_w = (kernel.width - 1) / 2;
 	Long kernel_radius_h = (kernel.height - 1) / 2;
@@ -95,7 +95,7 @@ Uchar convolution(const Imc2duc &src, Kernel kernel, Long edge_mode, Long b, Lon
 				sy = std::max(static_cast<Long>(0), std::min(sy, h - 1));
 			}
 
-			value += kernel.data[kx + kernel.width * ky] * src[b][sy][sx];
+			value += kernel.data[kx + kernel.width * ky] * src[sy][sx];
 		}
 	}
 
@@ -105,13 +105,11 @@ Uchar convolution(const Imc2duc &src, Kernel kernel, Long edge_mode, Long b, Lon
 	return static_cast<Uchar>(value);
 }
 
-Errc Operator(const Imc2duc &src, Imc2duc &dst, Kernel kernel, const Long edge_mode)
+Errc Operator(const Img2duc &src, Img2duc &dst, Kernel kernel, const Long edge_mode)
 {
 	for (Long y = 0; y < dst.Height(); ++y) {
 		for (Long x = 0; x < dst.Width(); ++x) {
-			for (Long b = 0; b < 3; ++b) {
-				dst[b][y][x] = convolution(src, kernel, edge_mode, b, x, y);
-			}
+			dst[y][x] = convolution(src, kernel, edge_mode, x, y);
 		}
 	}
 
@@ -131,8 +129,8 @@ int main(int argc, char *argv[])
 	ReadArgs(argc, argv, PARC, FINC, FOUTC, &mask,
 		 objin, objs, objout, objd, parv, USAGE);
 
-	if (objs[0]->Type() != Po_Imc2duc) {
-		std::cout << "Expected object of type Imc2duc (color, 2D, uchar)" << std::endl;
+	if (objs[0]->Type() != Po_Img2duc) {
+		std::cout << "Expected object of type Img2duc (grayscale, 2D, uchar)" << std::endl;
 		return 1;
 	}
 
@@ -150,7 +148,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	Imc2duc* const src = (Imc2duc *) objs[0];
+	Img2duc* const src = (Img2duc *) objs[0];
 
 	Dimension2d output_size(src->Width(), src->Height());
 
@@ -159,8 +157,8 @@ int main(int argc, char *argv[])
 		output_size.h -= kernel.height - 1;
 	}
 
-	objd[0] = new Imc2duc(output_size);
-	Imc2duc* const dst = (Imc2duc *) objd[0];
+	objd[0] = new Img2duc(output_size);
+	Img2duc* const dst = (Img2duc *) objd[0];
 
 	Errc result = Convolution::Operator(*src, *dst, kernel, edge_mode);
 
