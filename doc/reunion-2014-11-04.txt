@@ -1,0 +1,27 @@
+Réunion 4 novembre 2014
+===============================
+
+Diagramme de Gantt
+-------------------------------
+
+ * Ajouter tâches de tests et de bench.
+ * Ajouter livrables sous forme de jalons.
+
+Slides kick-off
+-------------------------------
+
+ * budget = éventuels outils de dev (licences commerciales...)
+ * tâche supplémentaire : comparaison perfs toolchains (Intel ICC)
+ * Risque concept : séparer prise en main de outils et compréhension des architectures
+ * première slide avec nom entreprise et liens vers ressources
+ * remanier les contraintes : dépend de contexte
+ * livrables avec gantt
+ * fiches de tâches (2-3)
+ * numéros des slides
+
+Kick-off
+------------------------------
+
+ * imprimer en 2-3 exemplaires avant le kick-off
+ * arriver avec tout prêt sur pc perso
+ 
