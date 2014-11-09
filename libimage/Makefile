@@ -8,7 +8,7 @@ OUTPUTLIB=lib/libimage.a
 OUTPUTTEST=test_libimage.exe
 
 SRCLIB=$(wildcard src/*.c)
-HDRLIB=$(wildcard include/*.h)
+HDRLIB=$(wildcard include/image/*.h)
 OBJLIB=$(patsubst src/%.c, obj/lib/%.o, $(SRCLIB))
 BASENAMELIB=$(patsubst src/%.c, %, $(SRCLIB))
 

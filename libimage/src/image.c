@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "image.h"
+#include "image/image.h"
 
 int Image_new(int width, int height, int channels, Image **imageptr)
 {
