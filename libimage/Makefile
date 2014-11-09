@@ -1,52 +1,58 @@
 CC=gcc
-CFLAGS=-Wall -W -std=c99 -I./include
-LDFLAGS=
+CLIBFLAGS=-Wall -W -std=c99 -I./include
+CTESTSFLAGS=-Wall -W -std=c99 -I./include
+LDTESTSFLAGS=-L./lib -limage
 AR=ar
 
 OUTPUTLIB=lib/libimage.a
 OUTPUTTEST=test_libimage.exe
 
-SRC=$(wildcard src/*.c)
-HDR=$(wildcard include/*.c)
-OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
-BASENAME=$(patsubst src/%.c, %, $(SRC))
+SRCLIB=$(wildcard src/*.c)
+HDRLIB=$(wildcard include/*.h)
+OBJLIB=$(patsubst src/%.c, obj/lib/%.o, $(SRCLIB))
+BASENAMELIB=$(patsubst src/%.c, %, $(SRCLIB))
 
-SRCTEST=$(wildcard src/test_*.c)
-HDRTEST=$(wildcard include/test_*.c)
-OBJTEST=$(patsubst src/%.c, obj/%.o, $(SRCTEST))
-BASENAMETEST=$(patsubst src/%.c, %, $(SRCTEST))
-
-SRCLIB=$(filter-out $(SRCTEST), $(SRC))
-HDRLIB=$(filter-out $(HDRTEST), $(HDR))
-OBJLIB=$(filter-out $(OBJTEST), $(OBJ))
-BASENAMELIB=$(filter-out $(BASENAMETEST), $(BASENAME))
+SRCTEST=$(wildcard tests/*.c)
+HDRTEST=$(wildcard tests/*.h)
+OBJTEST=$(patsubst tests/%.c, obj/tests/%.o, $(SRCTEST))
+BASENAMETEST=$(patsubst tests/%.c, %, $(SRCTEST))
 
 .PHONY: all clean libimage test
 
 all: libimage
 
-libimage: depend.d lib obj $(OUTPUTLIB)
+libimage: depend.d lib obj/lib $(OUTPUTLIB)
 
 $(OUTPUTLIB): $(OBJLIB)
 	$(AR) rcs $@ $^
 
 lib:
-	mkdir lib
+	mkdir $@
 
 obj:
-	mkdir obj
+	mkdir $@
 
-test: depend.d obj $(OUTPUTLIB) $(OUTPUTTEST)
+obj/lib: obj
+	mkdir $@
+
+obj/tests: obj
+	mkdir $@
+
+test: depend.d obj/tests $(OUTPUTLIB) $(OUTPUTTEST)
 
 $(OUTPUTTEST): $(OBJTEST)
-	gcc $^ -o $@ $(LDFLAGS) -L./lib -limage
+	gcc $^ -o $@ $(LDTESTSFLAGS)
 
-obj/%.o: src/%.c
-	$(CC) $< -c -o $@ $(CFLAGS)
+obj/lib/%.o: src/%.c
+	$(CC) $< -c -o $@ $(CLIBFLAGS)
 
-depend.d: $(SRC) $(HDRS)
+obj/tests/%.o: tests/%.c
+	$(CC) $< -c -o $@ $(CTESTSFLAGS)
+
+depend.d: $(SRCLIB) $(SRCTEST) $(HDRLIB) $(HDRTEST)
 	rm -f $@
-	for f in $(BASENAME); do $(CC) src/$$f.c $(CFLAGS) -MM -E -MT obj/$$f.o >> $@; done
+	for f in $(BASENAMELIB); do $(CC) src/$$f.c $(CLIBFLAGS) -MM -E -MT obj/lib/$$f.o >> $@; done
+	for f in $(BASENAMETEST); do $(CC) tests/$$f.c $(CTESTSFLAGS) -MM -E -MT obj/tests/$$f.o >> $@; done
 
 clean:
 	rm -rf obj
