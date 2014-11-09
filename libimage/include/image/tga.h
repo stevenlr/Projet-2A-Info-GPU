@@ -49,8 +49,8 @@ struct TGAHeader {
 	 */
 	uint8_t image_type;
 
-	struct TGAColorMapSpecification;
-	struct TGAImageSpecification;
+	struct TGAColorMapSpecification color_map_specification;
+	struct TGAImageSpecification image_specification;
 };
 
 #pragma pack(pop)
