@@ -102,6 +102,7 @@ int TGA_readImage(const char *filename, Image **imageptr)
 
 	Image *image = *imageptr;
 	size_t size = image->width * image->height * image->channels;
+
 	fread(image->data, sizeof(uint8_t), size, fp);
 
 	// Converts BGR to RGB.
@@ -123,8 +124,68 @@ int TGA_readImage(const char *filename, Image **imageptr)
 	return 0;
 }
 
-int TGA_writeImage(const char *filename, Image **imageptr)
+int TGA_writeImage(const char *filename, Image *image)
 {
+	if (image == NULL)
+		return 1;
+
+	FILE* fp = fopen(filename, "wb+");
+
+	if (fp == NULL)
+		return 1;
+
+	struct TGAHeader header;
+
+	header.id_length = 0;
+	header.color_map_type = 0;
+	header.image_type = (image->channels == 1) ? 3 : 2;
+
+	header.color_map_specification.first_entry_index = 0;
+	header.color_map_specification.color_map_length = 0;
+	header.color_map_specification.color_map_entry_size = 0;
+
+	header.image_specification.x_origin = 0;
+	header.image_specification.y_origin = 0;
+	header.image_specification.width = image->width;
+	header.image_specification.height = image->height;
+	header.image_specification.pixel_depth = image->channels * 8;
+	header.image_specification.image_descriptor = 0;
+
+	size_t size = image->width * image->height * image->channels;
+
+	fwrite(&header, sizeof(struct TGAHeader), 1, fp);
+
+	if (image->channels == 1) {
+		fwrite(image->data, sizeof(uint8_t), size, fp);
+	} else {
+		uint8_t *data;
+
+		data = (uint8_t *) malloc(size * sizeof(uint8_t));
+
+		if (data == NULL) {
+			fclose(fp);
+			return 1;
+		}
+
+		int nb_pixels = size / 3;
+		int i;
+		uint8_t *datasrc = image->data;
+		uint8_t *datadst = data;
+
+		for (i = 0; i < nb_pixels; ++i) {
+			datadst[0] = datasrc[2];
+			datadst[1] = datasrc[1];
+			datadst[2] = datasrc[0];
+
+			datasrc += 3;
+			datadst += 3;
+		}
+
+		fwrite(data, sizeof(uint8_t), size, fp);
+		free(data);
+	}
+
+	fclose(fp);
 
 	return 0;
 }

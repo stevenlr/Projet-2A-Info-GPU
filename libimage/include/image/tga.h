@@ -23,10 +23,10 @@ int TGA_readImage(const char *filename, Image **imageptr);
 /**
  * Writes an image to a Truevision Targa format file.
  * @param filename Path to the image to write.
- * @param imageptr Pointer to the image to create.
+ * @param image The image to create.
  * @return 0 if the image was read successfully,
  *         1 if there was an error when writing the image.
  */
-int TGA_writeImage(const char *filename, Image **imageptr);
+int TGA_writeImage(const char *filename, Image *image);
 
 #endif
