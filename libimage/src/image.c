@@ -10,14 +10,14 @@
 
 #include "image.h"
 
-int Image_new(int width, int height, int bpp, Image **imageptr)
+int Image_new(int width, int height, int channels, Image **imageptr)
 {
 	if (width < 0 || height < 0 || imageptr == NULL ||
-	    (bpp != 8 && bpp != 24 && bpp != 32)) {
+	   (channels != 1 && channels != 3)) {
 		return 2;
 	}
 
-	size_t size = width * height * (bpp >> 3);
+	size_t size = width * height * channels;
 	Image *image = (Image *) malloc(sizeof(Image));
 
 	if (image == NULL) {
@@ -26,7 +26,7 @@ int Image_new(int width, int height, int bpp, Image **imageptr)
 
 	image->width = width;
 	image->height = height;
-	image->bpp = bpp;
+	image->channels = channels;
 
 	image->data = (uint8_t *) calloc(size, sizeof(uint8_t));
 
@@ -50,4 +50,41 @@ int Image_delete(Image *image)
 	free(image);
 
 	return 0;
+}
+
+int Image_getOffset(Image *image, int x, int y)
+{
+	if (image == NULL
+	    || x < 0 || x >= image->width
+	    || y < 0 || y >= image->height) {
+		return -1;
+	}
+
+	return (y * image->width + x) * image->channels;
+}
+
+uint8_t Image_getPixel(Image *image, int x, int y, int c)
+{
+	if (c < 0 || c >= image->channels)
+		return 0;
+
+	int offset = Image_getOffset(image, x, y);
+
+	if (offset == -1)
+		return 0;
+
+	return image->data[offset + c];
+}
+
+void Image_setPixel(Image *image, int x, int y, int c, uint8_t value)
+{
+	if (c < 0 || c >= image->channels)
+		return;
+
+	int offset = Image_getOffset(image, x, y);
+
+	if (offset == -1)
+		return;
+
+	image->data[offset + c] = value;
 }
