@@ -52,6 +52,36 @@ int Image_delete(Image *image)
 	return 0;
 }
 
+int Image_copy(Image *src, Image **dst)
+{
+	if (dst == NULL || src == NULL || src->data == NULL) {
+		return 2;
+	}
+
+	size_t size = src->width * src->height * src->channels;
+	Image *image = (Image *) malloc(sizeof(Image));
+
+	if (image == NULL) {
+		return 1;
+	}
+
+	image->width = src->width;
+	image->height = src->height;
+	image->channels = src->channels;
+
+	image->data = (uint8_t *) malloc(size * sizeof(uint8_t));
+
+	if (image->data == NULL) {
+		free(image);
+		return 1;
+	}
+
+	memcpy(image->data, src->data, size * sizeof(uint8_t));
+	*dst = image;
+
+	return 0;
+}
+
 int Image_getOffset(Image *image, int x, int y)
 {
 	if (image == NULL

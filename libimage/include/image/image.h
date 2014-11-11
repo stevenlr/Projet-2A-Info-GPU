@@ -42,6 +42,16 @@ int Image_new(int width, int height, int channels, Image **imageptr);
 int Image_delete(Image *image);
 
 /**
+ * Copies an image.
+ * @param src Source image.
+ * @param dst Pointer to the destination image.
+ * @return 0 if the image was copied successfully,
+ 	   1 if there was an error when allocating memory,
+ 	   2 if arguments were invalid.
+ */
+int Image_copy(Image *src, Image **dst);
+
+/**
  * Computes the offset of a pixel in the image data.
  * @param image The image.
  * @param x Column number of the pixel.
