@@ -1,7 +1,7 @@
 CC=gcc
 CLIBFLAGS=-Wall -W -std=c99 -I./include
-CTESTSFLAGS=-Wall -W -std=c99 -I./include
-LDTESTSFLAGS=-L./lib -limage
+CTESTFLAGS=-Wall -W -std=c99 -I./include -I../unittest/include
+LDTESTFLAGS=-L./lib -limage
 AR=ar
 
 OUTPUTLIB=lib/libimage.a
@@ -12,10 +12,10 @@ HDRLIB=$(wildcard include/image/*.h)
 OBJLIB=$(patsubst src/%.c, obj/lib/%.o, $(SRCLIB))
 BASENAMELIB=$(patsubst src/%.c, %, $(SRCLIB))
 
-SRCTEST=$(wildcard tests/*.c)
-HDRTEST=$(wildcard tests/*.h)
-OBJTEST=$(patsubst tests/%.c, obj/tests/%.o, $(SRCTEST))
-BASENAMETEST=$(patsubst tests/%.c, %, $(SRCTEST))
+SRCTEST=$(wildcard test/*.c)
+HDRTEST=$(wildcard test/*.h)
+OBJTEST=$(patsubst test/%.c, obj/test/%.o, $(SRCTEST))
+BASENAMETEST=$(patsubst test/%.c, %, $(SRCTEST))
 
 .PHONY: all clean libimage test
 
@@ -35,24 +35,24 @@ obj:
 obj/lib: obj
 	mkdir $@
 
-obj/tests: obj
+obj/test: obj
 	mkdir $@
 
-test: depend.d obj/tests $(OUTPUTLIB) $(OUTPUTTEST)
+test: depend.d obj/test libimage $(OUTPUTTEST)
 
-$(OUTPUTTEST): $(OBJTEST)
-	gcc $^ -o $@ $(LDTESTSFLAGS)
+$(OUTPUTTEST): $(OBJTEST) $(OUTPUTLIB)
+	gcc $(OBJTEST) -o $@ $(LDTESTFLAGS)
 
 obj/lib/%.o: src/%.c
 	$(CC) $< -c -o $@ $(CLIBFLAGS)
 
-obj/tests/%.o: tests/%.c
-	$(CC) $< -c -o $@ $(CTESTSFLAGS)
+obj/test/%.o: test/%.c
+	$(CC) $< -c -o $@ $(CTESTFLAGS)
 
 depend.d: $(SRCLIB) $(SRCTEST) $(HDRLIB) $(HDRTEST)
 	rm -f $@
 	for f in $(BASENAMELIB); do $(CC) src/$$f.c $(CLIBFLAGS) -MM -E -MT obj/lib/$$f.o >> $@; done
-	for f in $(BASENAMETEST); do $(CC) tests/$$f.c $(CTESTSFLAGS) -MM -E -MT obj/tests/$$f.o >> $@; done
+	for f in $(BASENAMETEST); do $(CC) test/$$f.c $(CTESTFLAGS) -MM -E -MT obj/test/$$f.o >> $@; done
 
 clean:
 	rm -rf obj

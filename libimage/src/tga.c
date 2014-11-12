@@ -102,11 +102,16 @@ int TGA_readImage(const char *filename, Image **imageptr)
 
 	Image *image = *imageptr;
 	size_t size = image->width * image->height * image->channels;
+	uint8_t *scanline_ptr = image->data + image->width * (image->height - 1) * image->channels;
 
-	fread(image->data, sizeof(uint8_t), size, fp);
+	// Inverts y axis
+	while (scanline_ptr >= image->data) {
+		fread(scanline_ptr, sizeof(uint8_t), image->width * image->channels, fp);
+		scanline_ptr -= image->width * image->channels;
+	}
 
 	// Converts BGR to RGB.
-	if (header.image_type == 2) {
+	if (image->channels == 3) {
 		int nb_pixels = size / 3;
 		int i;
 		uint8_t *dataptr = image->data;
@@ -115,7 +120,7 @@ int TGA_readImage(const char *filename, Image **imageptr)
 		for (i = 0; i < nb_pixels; ++i, dataptr += 3) {
 			tmp = dataptr[0];
 			dataptr[0] = dataptr[2];
-			dataptr[0] = tmp;
+			dataptr[2] = tmp;
 		}
 	}
 
