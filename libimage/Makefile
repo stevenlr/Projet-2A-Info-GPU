@@ -17,7 +17,7 @@ HDRTEST=$(wildcard test/*.h)
 OBJTEST=$(patsubst test/%.c, obj/test/%.o, $(SRCTEST))
 BASENAMETEST=$(patsubst test/%.c, %, $(SRCTEST))
 
-.PHONY: all clean libimage test
+.PHONY: all clean cleanall libimage test
 
 all: libimage
 
@@ -57,5 +57,9 @@ depend.d: $(SRCLIB) $(SRCTEST) $(HDRLIB) $(HDRTEST)
 clean:
 	rm -rf obj
 	rm -f depend.d
+
+cleanall: clean
+	rm -rf lib
+	rm -f $(OUTPUTTEST)
 
 include depend.d
