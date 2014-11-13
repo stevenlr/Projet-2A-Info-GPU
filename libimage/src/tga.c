@@ -157,14 +157,13 @@ int TGA_writeImage(const char *filename, Image *image)
 	header.image_specification.image_descriptor = 0;
 
 	size_t size = image->width * image->height * image->channels;
+	uint8_t *data;
 
 	fwrite(&header, sizeof(struct TGAHeader), 1, fp);
 
 	if (image->channels == 1) {
-		fwrite(image->data, sizeof(uint8_t), size, fp);
+		data = image->data;
 	} else {
-		uint8_t *data;
-
 		data = (uint8_t *) malloc(size * sizeof(uint8_t));
 
 		if (data == NULL) {
@@ -185,8 +184,17 @@ int TGA_writeImage(const char *filename, Image *image)
 			datasrc += 3;
 			datadst += 3;
 		}
+	}
 
-		fwrite(data, sizeof(uint8_t), size, fp);
+	uint8_t *scanline_ptr = data + image->width * (image->height - 1) * image->channels;
+
+	// Inverts y axis
+	while (scanline_ptr >= data) {
+		fwrite(scanline_ptr, sizeof(uint8_t), image->width * image->channels, fp);
+		scanline_ptr -= image->width * image->channels;
+	}
+
+	if (image->channels == 3) {
 		free(data);
 	}
 

@@ -12,7 +12,7 @@
 
 int Image_new(int width, int height, int channels, Image **imageptr)
 {
-	if (width < 0 || height < 0 || imageptr == NULL ||
+	if (width <= 0 || height <= 0 || imageptr == NULL ||
 	   (channels != 1 && channels != 3)) {
 		return 2;
 	}

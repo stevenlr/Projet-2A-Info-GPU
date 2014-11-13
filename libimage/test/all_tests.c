@@ -11,6 +11,7 @@
 
 int main(int argc, char* argv[])
 {
+	test_image_all();
 	test_tga_all();
 
 	return 0;

@@ -7,6 +7,7 @@
 #ifndef _TESTS_H
 #define _TESTS_H
 
+void test_image_all();
 void test_tga_all();
 
 #endif
