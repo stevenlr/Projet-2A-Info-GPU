@@ -63,9 +63,31 @@ void test_image_copy()
 	Image_delete(img2);
 }
 
+void test_image_data()
+{
+	Image *img;
+
+	Image_new(16, 8, 3, &img);
+
+	ut_assert("out of bounds image offet", Image_getOffset(img, -4, 3) == -1);
+	ut_assert("out of bounds image offet", Image_getOffset(img, 3, 27) == -1);
+	ut_assert("image offet", Image_getOffset(img, 3, 4) == 201);
+
+	img->data[202] = 72;
+	ut_assert("image get pixel", Image_getPixel(img, 3, 4, 1) == 72);
+	ut_assert("image get pixel out of bounds", Image_getPixel(img, -4, 4, 1) == 0);
+	ut_assert("image get pixel out of bounds", Image_getPixel(img, 3, 32, 1) == 0);
+	ut_assert("image get pixel out of bounds", Image_getPixel(img, 3, 4, 5) == 0);
+
+	Image_setPixel(img, 3, 4, 2, 84);
+	ut_assert("image set pixel", img->data[203] == 84);
+
+	Image_delete(img);
+}
+
 void test_image_all()
 {
 	test_image_new_delete();
 	test_image_copy();
-	test_ulage_data();
+	test_image_data();
 }
