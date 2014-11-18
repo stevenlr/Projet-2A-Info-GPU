@@ -59,8 +59,8 @@ void erosion(int argc, char *argv[])
 
 	for (i = 0; i < size; ++i) {
 		c = i % input_image->channels;
-		x = (i - c) % input_image->width;
-		y = (i - c) / input_image->height;
+		x = ((i - c) / input_image->channels) % input_image->width;
+		y = ((i - c) / input_image->channels) / input_image->height;
 		current_min = *out_data;
 
 		int x1 = max(0, x - radius);
