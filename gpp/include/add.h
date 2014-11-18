@@ -1,5 +1,5 @@
 /**
- * @file thresold.h
+ * @file add.h
  * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
  * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
  */
@@ -8,7 +8,7 @@
 #define _ADD_H
 
 /**
- * Applies a thresold filter on an image.
+ * Adds two images together.
  * @param argc number of arguments.
  * @param argv Program arguments.
  */

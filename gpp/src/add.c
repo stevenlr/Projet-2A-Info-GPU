@@ -31,42 +31,47 @@ void add(int argc, char *argv[])
 
 	if ((error = TGA_readImage(argv[1], &input_image2)) != 0) {
 		printf("Error when opening image: %d\n", error);
+		Image_delete(input_image2);
 		return;
 	}
 
 	if (input_image1->height != input_image2->height ||
 		input_image1->width != input_image2->width ) {
-		printf("Error : Images should be the same size.");
+		printf("Error : Input images should be the same size.\n");
+		Image_delete(input_image1);
+		Image_delete(input_image2);
 		return;
 	}
 
-	if ((error = Image_copy(input_image1, &output_image)) != 0) {
-		printf("Error when copying image: %d\n", error);
-		Image_delete(input_image);
+	if ((error = Image_new(input_image1->width,
+			       input_image1->height,
+			       input_image1->channels,
+			       &output_image)) != 0) {
+		printf("Error when creating output image : %d\n", error);
+		Image_delete(input_image1);
+		Image_delete(input_image2);
 		return;
 	}
 
 	int i, size;
-	uint8_t *data, dataImg1, dataImg2;
-	int currentData;
+	uint8_t *datao, *data1, *data2;
+	uint16_t current_data;
 
-	data = output_image->data;
-	dataImg1 = input_image1->data;
-	dataImg2 = input_image2->data;
-	size = input_image->width * input_image->height * input_image->channels;
+	datao = output_image->data;
+	data1 = input_image1->data;
+	data2 = input_image2->data;
+	size = input_image1->width * input_image1->height * input_image1->channels;
 
 	for (i = 0; i < size; ++i) {
-		currentData = *dataImg1 + *dataImg2;
-		*data = (currentData > 0xff) ? 0xff : currentData;
-		++data;
-		++dataImg1;
-		++dataImg2;
+		current_data = (*data1++) + (*data2++);
+		*datao++ = (current_data > 0xff) ? 0xff : current_data;
 	}
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
 	}
 
-	Image_delete(input_image);
+	Image_delete(input_image1);
+	Image_delete(input_image2);
 	Image_delete(output_image);
 }
