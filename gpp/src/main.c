@@ -12,6 +12,7 @@
 #include "threshold.h"
 #include "add.h"
 #include "erosion.h"
+#include "convolution.h"
 
 int main(int argc, char *argv[])
 {
