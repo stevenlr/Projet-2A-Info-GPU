@@ -1,17 +1,17 @@
 /**
- * @file threshold.h
+ * @file thresold.h
  * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
  * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
  */
 
-#ifndef _THRESHOLD_H
-#define _THRESHOLD_H
+#ifndef _ADD_H
+#define _ADD_H
 
 /**
- * Applies a threshold filter on an image.
+ * Applies a thresold filter on an image.
  * @param argc number of arguments.
  * @param argv Program arguments.
  */
-void threshold(int argc, char *argv[]);
+void add(int argc, char *argv[]);
 
 #endif

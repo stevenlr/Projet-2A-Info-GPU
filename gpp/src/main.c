@@ -10,6 +10,7 @@
 
 #include "invert.h"
 #include "threshold.h"
+#include "add.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,8 @@ int main(int argc, char *argv[])
 		invert(argc - 2, argv + 2);
 	} else if (strcmp(argv[1], "threshold") == 0) {
 		threshold(argc - 2, argv + 2);
+	} else if (strcmp(argv[1], "add") == 0) {
+		add(argc - 2, argv + 2);
 	} else {
 		printf("Filter not implemented.\n");
 	}
