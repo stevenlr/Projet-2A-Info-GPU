@@ -123,30 +123,25 @@ void convolution(int argc, char *argv[])
 
 	int radius_x, radius_y;
 	int x, y, c;
-	int row_offset, line_offset;
 	uint8_t *out_data = output_image->data;
 
 	radius_x = (kernel.width - 1) / 2;
 	radius_y = (kernel.height - 1) / 2;
 
-	line_offset = input_image->width * input_image->channels;
-	row_offset = input_image->channels;
-
 	for (y = 0; y < input_image->height; ++y) {
 		for (x = 0; x < input_image->width; ++x) {
 			for (c = 0; c < input_image->channels; ++c) {
 				int kx, ky;
-				uint8_t *data = input_image->data + Image_getOffset(input_image, x, y) + c;
 				float *kernel_data = kernel.data;
 				float sum = 0;
 
 				for (ky = -radius_y; ky <= radius_y; ++ky) {
 					for (kx = -radius_x; kx <= radius_x; ++kx) {
-						sum += *data * *kernel_data++;
-						data += row_offset;
-					}
+						int xx = clip(x + kx, 0, input_image->width - 1);
+						int yy = clip(y + ky, 0, input_image->height - 1);
 
-					data += line_offset - row_offset * kernel.width;
+						sum += Image_getPixel(input_image, xx, yy, c) * *kernel_data++;
+					}
 				}
 
 				sum /= kernel.sum;
@@ -162,4 +157,3 @@ void convolution(int argc, char *argv[])
 	Image_delete(input_image);
 	Image_delete(output_image);
 }
-
