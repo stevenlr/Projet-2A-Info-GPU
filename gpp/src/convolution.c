@@ -13,6 +13,10 @@
 
 #include "convolution.h"
 
+#define min(x, y) ((x < y) ? x : y)
+#define max(y, x) ((y < x) ? x : y)
+#define clip(x, a, b) (min(b, max(a, x)))
+
 typedef struct {
 	int width;
 	int height;
@@ -108,9 +112,48 @@ void convolution(int argc, char *argv[])
 		return;
 	}
 
-	/**
-	 * TODO: fill this in
-	 */
+	Kernel kernel;
+
+	if ((error = get_kernel(argv[1], &kernel)) != 0) {
+		printf("Error when opening kernel : %d\n", error);
+		Image_delete(input_image);
+		Image_delete(output_image);
+		return;
+	}
+
+	int radius_x, radius_y;
+	int x, y, c;
+	int row_offset, line_offset;
+	uint8_t *out_data = output_image->data;
+
+	radius_x = (kernel.width - 1) / 2;
+	radius_y = (kernel.height - 1) / 2;
+
+	line_offset = input_image->width * input_image->channels;
+	row_offset = input_image->channels;
+
+	for (y = 0; y < input_image->height; ++y) {
+		for (x = 0; x < input_image->width; ++x) {
+			for (c = 0; c < input_image->channels; ++c) {
+				int kx, ky;
+				uint8_t *data = input_image->data + Image_getOffset(input_image, x, y) + c;
+				float *kernel_data = kernel.data;
+				float sum = 0;
+
+				for (ky = -radius_y; ky <= radius_y; ++ky) {
+					for (kx = -radius_x; kx <= radius_x; ++kx) {
+						sum += *data * *kernel_data++;
+						data += row_offset;
+					}
+
+					data += line_offset - row_offset * kernel.width;
+				}
+
+				sum /= kernel.sum;
+				*out_data++ = clip(sum, 0, 255);
+			}
+		}
+	}
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
@@ -119,3 +162,4 @@ void convolution(int argc, char *argv[])
 	Image_delete(input_image);
 	Image_delete(output_image);
 }
+
