@@ -11,8 +11,6 @@
 #include <image/tga.h>
 #include "tests.h"
 
-#define EPSYLON 0x01
-
 void launchTestsOf(char *type, char *filters[], int argc)
 {
 	int i;
@@ -95,12 +93,12 @@ int test(char *type, char *filter)
 
 	for (i = 0; i < size; ++i) {
 
-		if (abs((*datar++) - (*datat++)) > EPSYLON) {
+		if (abs((*datar++) - (*datat++)) > 0) {
 			++error;
 		}
 	}
 
-	printf("%s-%s: %s\n", type, filter, error > 0 ? "Echec !" : "OK !");
+	printf("%s-%s: %s (%d)\n", type, filter, error > 0 ? "Echec !" : "OK !", error);
 
 	return error == 0;
 }
