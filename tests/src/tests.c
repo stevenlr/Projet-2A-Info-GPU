@@ -84,7 +84,7 @@ int test(char *type, char *filter)
 	}
 
 	int size, i;
-	uint8_t *datar, *datat;
+	uint8_t *datar, *datat, datad, bestDifference = 0;
 
 	datar = ref_image->data;
 	datat = test_image->data;
@@ -93,12 +93,22 @@ int test(char *type, char *filter)
 
 	for (i = 0; i < size; ++i) {
 
-		if (abs((*datar++) - (*datat++)) > 0) {
+		datad = abs((*datar++) - (*datat++));
+
+		if (datad > 0) {
+			if (datad > bestDifference)
+				bestDifference = datad;
 			++error;
 		}
 	}
 
-	printf("%s-%s: %s (%d)\n", type, filter, error > 0 ? "Echec !" : "OK !", error);
+	float differencePercent = ((float) error) / (ref_image->height * ref_image->width) * 100;
+
+	if (error == 0) {
+		printf("%s-%s: OK!\n", type, filter);
+	} else {
+		printf("%s-%s: Failed! (Difference : %.2f%%) (Highest difference for a pixel : %d)\n", type, filter, differencePercent, bestDifference);
+	}
 
 	return error == 0;
 }
