@@ -1,0 +1,16 @@
+Réunion 25 novembre 2014
+===========================
+
+Documentation/implémentation
+-------------------------------
+ 
+ * se renseigner sur usertime / cputime
+ * Se concentrer sur cputime
+
+Benchmark
+-------------------------------
+
+ * Travailler avec fréquence figée (Max)
+ * Couper l'hyperthreading
+
+Le but étant de rendre un benchmark sur chacun des points précédents.
