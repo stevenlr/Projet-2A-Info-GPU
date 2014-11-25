@@ -7,7 +7,7 @@ OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
 BASENAME=$(patsubst, src/%.c, %, $(SRC))
 HDR=$(wildcard include/*.h)
 
-.PHONY: all clean cleanall
+.PHONY: all clean cleanall run
 
 all: $(BIN)
 
@@ -33,5 +33,8 @@ cleanall: clean
 depend.d: $(SRC) $(HDR)
 	rm -f $@
 	for f in $(BASENAME); do $(CC) src/$$f.c $(CFLAGS) -MM -E -MT obj/$$f.o >> $@; done
+
+run: $(BIN)
+	$(BIN) all all
 
 include depend.d
