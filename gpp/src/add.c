@@ -11,6 +11,7 @@
 #include <image/tga.h>
 
 #include "add.h"
+#include "benchmark.h"
 
 void add(int argc, char *argv[])
 {
@@ -62,10 +63,17 @@ void add(int argc, char *argv[])
 	data2 = input_image2->data;
 	size = input_image1->width * input_image1->height * input_image1->channels;
 
+	Benchmark bench;
+	start_benchmark(&bench);
+
 	for (i = 0; i < size; ++i) {
 		current_data = (*data1++) + (*data2++);
 		*datao++ = (current_data > 0xff) ? 0xff : current_data;
 	}
+
+	end_benchmark(&bench);
+	printf("%lu ", bench.elapsed_ticks);
+	printf("%lf\n", bench.elapsed_time);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);

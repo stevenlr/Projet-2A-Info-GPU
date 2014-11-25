@@ -11,6 +11,7 @@
 #include <image/tga.h>
 
 #include "invert.h"
+#include "benchmark.h"
 
 void invert(int argc, char *argv[])
 {
@@ -40,8 +41,15 @@ void invert(int argc, char *argv[])
 	data = output_image->data;
 	size = input_image->width * input_image->height * input_image->channels;
 
+	Benchmark bench;
+	start_benchmark(&bench);
+
 	for (i = 0; i < size; ++i)
 		*data++ ^= 0xff;
+
+	end_benchmark(&bench);
+	printf("%lu ", bench.elapsed_ticks);
+	printf("%lf\n", bench.elapsed_time);
 
 	if ((error = TGA_writeImage(argv[1], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);

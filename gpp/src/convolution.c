@@ -12,6 +12,7 @@
 #include <image/tga.h>
 
 #include "convolution.h"
+#include "benchmark.h"
 
 #define min(x, y) ((x < y) ? x : y)
 #define max(y, x) ((y < x) ? x : y)
@@ -128,6 +129,9 @@ void convolution(int argc, char *argv[])
 	radius_x = (kernel.width - 1) / 2;
 	radius_y = (kernel.height - 1) / 2;
 
+	Benchmark bench;
+	start_benchmark(&bench);
+
 	for (y = 0; y < input_image->height; ++y) {
 		for (x = 0; x < input_image->width; ++x) {
 			for (c = 0; c < input_image->channels; ++c) {
@@ -149,6 +153,10 @@ void convolution(int argc, char *argv[])
 			}
 		}
 	}
+
+	end_benchmark(&bench);
+	printf("%lu ", bench.elapsed_ticks);
+	printf("%lf\n", bench.elapsed_time);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);

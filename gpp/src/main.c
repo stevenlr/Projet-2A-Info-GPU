@@ -13,6 +13,7 @@
 #include "add.h"
 #include "erosion.h"
 #include "convolution.h"
+#include "benchmark.h"
 
 int main(int argc, char *argv[])
 {

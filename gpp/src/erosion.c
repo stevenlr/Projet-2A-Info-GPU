@@ -11,6 +11,7 @@
 #include <image/tga.h>
 
 #include "erosion.h"
+#include "benchmark.h"
 
 #define min(x, y) ((x < y) ? x : y)
 #define max(x, y) ((x > y) ? x : y)
@@ -57,6 +58,9 @@ void erosion(int argc, char *argv[])
 	row_offset = input_image->channels;
 	size = input_image->width * input_image->height * input_image->channels;
 
+	Benchmark bench;
+	start_benchmark(&bench);
+
 	for (i = 0; i < size; ++i) {
 		c = i % input_image->channels;
 		x = ((i - c) / input_image->channels) % input_image->width;
@@ -82,6 +86,10 @@ void erosion(int argc, char *argv[])
 
 		*out_data++ = current_min;
 	}
+
+	end_benchmark(&bench);
+	printf("%lu ", bench.elapsed_ticks);
+	printf("%lf\n", bench.elapsed_time);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);

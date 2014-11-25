@@ -11,6 +11,7 @@
 #include <image/tga.h>
 
 #include "threshold.h"
+#include "benchmark.h"
 
 void threshold(int argc, char *argv[])
 {
@@ -43,10 +44,17 @@ void threshold(int argc, char *argv[])
 	data = output_image->data;
 	size = input_image->width * input_image->height * input_image->channels;
 
+	Benchmark bench;
+	start_benchmark(&bench);
+
 	for (i = 0; i < size; ++i) {
 		*data = (*data >= value) ? 0xff : 0x00;
 		++data;
 	}
+
+	end_benchmark(&bench);
+	printf("%lu ", bench.elapsed_ticks);
+	printf("%lf\n", bench.elapsed_time);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
