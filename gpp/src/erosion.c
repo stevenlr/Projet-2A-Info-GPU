@@ -68,9 +68,9 @@ void erosion(int argc, char *argv[])
 		current_min = *out_data;
 
 		int x1 = max(0, x - radius);
-		int x2 = min(input_image->width, x + radius);
+		int x2 = min(input_image->width - 1, x + radius);
 		int y1 = max(0, y - radius);
-		int y2 = min(input_image->height, y + radius);
+		int y2 = min(input_image->height - 1, y + radius);
 		int xx, yy;
 
 		uint8_t *region = in_data + Image_getOffset(input_image, x1, y1) + c;

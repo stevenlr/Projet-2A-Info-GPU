@@ -10,10 +10,6 @@ HDR=$(wildcard include/*.h)
 .PHONY: all clean cleanall run
 
 all: $(BIN)
-	echo $(SRC)
-	echo $(OBJ)
-	echo $(BASENAME)
-	echo $(HDR)
 
 obj:
 	mkdir obj
@@ -43,7 +39,7 @@ run: output-images $(BIN)
 	$(BIN) threshold ../references/input-images/Lenna.tga 127 output-images/threshold.tga
 	$(BIN) add ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
 	$(BIN) erosion ../references/input-images/binary.tga 3 output-images/erosion-binary.tga
-	$(BIN) erosion ../references/input-images/Lenna.tga 3 output-images/erosion-colors.tga
+	$(BIN) erosion ../references/input-images/Lenna.tga 1 output-images/erosion-colors.tga
 	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/7x7gaussian.txt output-images/convolution-7x7gaussian-extend.tga
 	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/3x3sharpen.txt output-images/convolution-3x3sharpen-extend.tga
 
