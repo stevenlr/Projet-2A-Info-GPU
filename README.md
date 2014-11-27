@@ -12,6 +12,6 @@ make cleanall		Nettoie tous les fichiers construits lors de la commande make.
 Les images de sortie générées se trouvent dans gpp/output-images.
 Les images de référence se trouvent dans references/output-images.
 
-Les nombres renvoyées par la commande "make run_tests_gpp" représentent :
-- Le nombre de tics lors de l'exécution de l'algorithme.
+Les nombres renvoyées par la commande "make run_gpp" représentent :
+- Le nombre de cycles d'horloge lors de l'exécution de l'algorithme.
 - Le temps réel en seconde de l'exécution de l'algorithme.
