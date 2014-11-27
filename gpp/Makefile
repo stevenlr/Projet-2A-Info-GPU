@@ -4,12 +4,16 @@ LDFLAGS=-L../libimage/lib -limage
 BIN=bin/filters-gpp.exe
 SRC=$(wildcard src/*.c)
 OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
-BASENAME=$(patsubst, src/%.c, %, $(SRC))
+BASENAME=$(patsubst src/%.c, %, $(SRC))
 HDR=$(wildcard include/*.h)
 
 .PHONY: all clean cleanall run
 
 all: $(BIN)
+	echo $(SRC)
+	echo $(OBJ)
+	echo $(BASENAME)
+	echo $(HDR)
 
 obj:
 	mkdir obj
