@@ -61,13 +61,14 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	float difference_percent = ((float) error) / (ref_image->height * ref_image->width) * 100;
-	average_difference /= (float) (ref_image->height * ref_image->width) * 100;
+	average_difference /= (float) error;
+	float difference_percent = ((float) error) * average_difference / (ref_image->height * ref_image->width * ref_image->channels * 255) * 100;
+
 
 	if (error == 0) {
 		printf("OK!\n");
 	} else {
-		printf("Failed! (Difference : %.3f%%) (Average difference per pixel : %.3f)\n", difference_percent, average_difference);
+		printf("Failed! (Difference : %.3f%%) (Average difference : %.3f)\n", difference_percent, average_difference);
 	}
 
 	return 0;
