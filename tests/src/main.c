@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	average_difference /= (float) error;
-	float difference_percent = ((float) error) * average_difference / (ref_image->height * ref_image->width * ref_image->channels * 255) * 100;
 
+	float difference_percent = average_difference / (ref_image->height * ref_image->width * ref_image->channels * 255) * 100;
+	average_difference /= (float) error;
 
 	if (error == 0) {
 		printf("OK!\n");
