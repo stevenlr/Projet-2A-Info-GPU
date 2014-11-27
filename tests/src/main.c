@@ -20,22 +20,19 @@ int main(int argc, char *argv[])
 	Image *ref_image;
 	Image *test_image;
 	int error = 0;
-	char filePathReference[100];
-	char filePathTest[100];
+	char *file_path_reference = argv[1];
+	char *file_path_test = argv[2];
 
-	sprintf(filePathReference, argv[1]);
-	sprintf(filePathTest, argv[2]);
-
-	if ((error = TGA_readImage(filePathReference, &ref_image)) != 0) {
+	if ((error = TGA_readImage(file_path_reference, &ref_image)) != 0) {
 		printf("Error when opening image: %d (%s)\n", error,
-			filePathReference);
-		printf("%s", filePathReference);
+			file_path_reference);
+		printf("%s", file_path_reference);
 		return 0;
 	}
 
-	if ((error = TGA_readImage(filePathTest, &test_image)) != 0) {
-		printf("Error when opening image: %d (%s)\n", error, filePathTest);
-		printf("%s", filePathTest);
+	if ((error = TGA_readImage(file_path_test, &test_image)) != 0) {
+		printf("Error when opening image: %d (%s)\n", error, file_path_test);
+		printf("%s", file_path_test);
 		return 0;
 	}
 
@@ -47,7 +44,7 @@ int main(int argc, char *argv[])
 
 	int size, i;
 	uint8_t *datar, *datat, datad;
-	float averageDifference = 0;
+	float average_difference = 0;
 
 	datar = ref_image->data;
 	datat = test_image->data;
@@ -59,18 +56,18 @@ int main(int argc, char *argv[])
 		datad = abs((*datar++) - (*datat++));
 
 		if (datad > 0) {
-			averageDifference += datad;
+			average_difference += datad;
 			++error;
 		}
 	}
 
-	float differencePercent = ((float) error) / (ref_image->height * ref_image->width) * 100;
-	averageDifference /= (float) (ref_image->height * ref_image->width) * 100;
+	float difference_percent = ((float) error) / (ref_image->height * ref_image->width) * 100;
+	average_difference /= (float) (ref_image->height * ref_image->width) * 100;
 
 	if (error == 0) {
 		printf("OK!\n");
 	} else {
-		printf("Failed! (Difference : %.3f%%) (Average difference per pixel : %.3f)\n", differencePercent, averageDifference);
+		printf("Failed! (Difference : %.3f%%) (Average difference per pixel : %.3f)\n", difference_percent, average_difference);
 	}
 
 	return 0;

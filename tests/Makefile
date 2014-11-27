@@ -4,9 +4,9 @@ LDFLAGS=-L../libimage/lib -limage
 BIN=bin/tests.exe
 SRC=$(wildcard src/*.c)
 OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
-BASENAME=$(patsubst, src/%.c, %, $(SRC))
+BASENAME=$(patsubst src/%.c, %, $(SRC))
 REF_IMAGE=$(wildcard ../references/output-images/*.tga)
-BASENAME_IMAGE=$(patsubst, ../references/output-images/%.tga, %, $(REF_IMAGE))
+BASENAME_IMAGE=$(patsubst ../references/output-images/%.tga, %, $(REF_IMAGE))
 HDR=$(wildcard include/*.h)
 
 .PHONY: all clean cleanall run
@@ -37,7 +37,6 @@ depend.d: $(SRC) $(HDR)
 	for f in $(BASENAME); do $(CC) src/$$f.c $(CFLAGS) -MM -E -MT obj/$$f.o >> $@; done
 
 run: $(BIN)
-	for f in $(BASENAME_IMAGE); do $(BIN) ../references/output-images/$$f.tga ../gpp/output-images/$$f.tga ; done
-	$(BIN) ../references/output-images/erosion-binary.tga ../gpp/output-images/erosion-binary.tga
+	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../gpp/output-images/$$f.tga ; done
 
 include depend.d
