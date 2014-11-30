@@ -16,7 +16,7 @@ struct Image {
 	int width;	/**< Number of columns. */
 	int height;	/**< Number of rows. */
 	int channels;	/**< Number of channels. (1 or 3) */
-	uint8_t *data;	/**< Image data. */
+	uint8_t **data;	/**< Image data. */
 };
 
 typedef struct Image Image;

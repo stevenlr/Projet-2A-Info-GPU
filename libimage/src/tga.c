@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "image/image.h"
 #include "image/tga.h"
@@ -101,30 +102,47 @@ int TGA_readImage(const char *filename, Image **imageptr)
 	}
 
 	Image *image = *imageptr;
-	size_t size = image->width * image->height * image->channels;
-	uint8_t *scanline_ptr = image->data + image->width * (image->height - 1) * image->channels;
+	size_t size = image->width * image->height;
+	int c;
 
-	// Inverts y axis
-	while (scanline_ptr >= image->data) {
-		fread(scanline_ptr, sizeof(uint8_t), image->width * image->channels, fp);
-		scanline_ptr -= image->width * image->channels;
+	uint8_t *full_data = (uint8_t *) malloc(sizeof(uint8_t) * size * image->channels);
+
+	if (full_data == NULL) {
+		return 1;
 	}
 
-	// Converts BGR to RGB.
-	if (image->channels == 3) {
-		int nb_pixels = size / 3;
-		int i;
-		uint8_t *dataptr = image->data;
-		uint8_t tmp;
+	fread(full_data, sizeof(uint8_t), size * image->channels, fp);
+	fclose(fp);
 
-		for (i = 0; i < nb_pixels; ++i, dataptr += 3) {
-			tmp = dataptr[0];
-			dataptr[0] = dataptr[2];
-			dataptr[2] = tmp;
+	if (image->channels == 1) {
+		uint8_t *data_ptr = image->data[0];
+		uint8_t *scanline_ptr_dst = data_ptr + image->width * (image->height - 1);
+		uint8_t *scanline_ptr_src = full_data;
+
+		while (scanline_ptr_dst >= data_ptr) {
+			memcpy(scanline_ptr_dst, scanline_ptr_src, image->width);
+			scanline_ptr_dst -= image->width;
+			scanline_ptr_src += image->width;
+		}
+	} else {
+		for (c = 0; c < image->channels; ++c) {
+			uint8_t *data_ptr = image->data[image->channels - c - 1];
+			uint8_t *scanline_ptr_dst = data_ptr + image->width * (image->height - 1);
+			uint8_t *scanline_ptr_src = full_data;
+
+			while (scanline_ptr_dst >= data_ptr) {
+				int x;
+
+				for (x = 0; x < image->width; ++x)
+					scanline_ptr_dst[x] = scanline_ptr_src[x * image->channels + c];
+
+				scanline_ptr_dst -= image->width;
+				scanline_ptr_src += image->width * image->channels;
+			}
 		}
 	}
 
-	fclose(fp);
+	free(full_data);
 
 	return 0;
 }
@@ -156,33 +174,28 @@ int TGA_writeImage(const char *filename, Image *image)
 	header.image_specification.pixel_depth = image->channels * 8;
 	header.image_specification.image_descriptor = 0;
 
-	size_t size = image->width * image->height * image->channels;
+	size_t size = image->width * image->height;
 	uint8_t *data;
 
 	fwrite(&header, sizeof(struct TGAHeader), 1, fp);
 
 	if (image->channels == 1) {
-		data = image->data;
+		data = image->data[0];
 	} else {
-		data = (uint8_t *) malloc(size * sizeof(uint8_t));
+		data = (uint8_t *) malloc(size * image->channels * sizeof(uint8_t));
 
 		if (data == NULL) {
 			fclose(fp);
 			return 1;
 		}
 
-		int nb_pixels = size / 3;
-		int i;
-		uint8_t *datasrc = image->data;
-		uint8_t *datadst = data;
+		int c;
+		unsigned int i;
+		uint8_t *ptr_dst = data;
 
-		for (i = 0; i < nb_pixels; ++i) {
-			datadst[0] = datasrc[2];
-			datadst[1] = datasrc[1];
-			datadst[2] = datasrc[0];
-
-			datasrc += 3;
-			datadst += 3;
+		for (i = 0; i < size; ++i) {
+			for (c = 0; c < image->channels; ++c)
+				*ptr_dst++ = image->data[image->channels - c - 1][i];
 		}
 	}
 

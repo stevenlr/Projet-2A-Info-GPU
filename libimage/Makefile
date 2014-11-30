@@ -1,5 +1,5 @@
 CC=gcc
-CLIBFLAGS=-Wall -W -std=c99 -I./include
+CLIBFLAGS=-Wall -W -std=c99 -I./include -O3
 CTESTFLAGS=-Wall -W -std=c99 -I./include -I../unittest/include
 LDTESTFLAGS=-L./lib -limage
 AR=ar
@@ -29,14 +29,11 @@ $(OUTPUTLIB): $(OBJLIB)
 lib:
 	mkdir $@
 
-obj:
-	mkdir $@
+obj/lib:
+	mkdir -p $@
 
-obj/lib: obj
-	mkdir $@
-
-obj/test: obj
-	mkdir $@
+obj/test:
+	mkdir -p $@
 
 test: depend.d obj/test libimage $(OUTPUTTEST)
 

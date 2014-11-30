@@ -20,6 +20,7 @@ void test_tga_read()
 	const char *file_gray = "test/grayscale.tga";
 	const char *file_compressed = "test/compressed.tga";
 	const char *file_colormapped = "test/color-mapped.tga";
+	int i, error = 0;
 
 	ut_assert("null image pointer", TGA_readImage(file_rgb, NULL) == 2);
 	ut_assert("file not readable", TGA_readImage("doesnotexist", &img_color) == 2);
@@ -30,26 +31,23 @@ void test_tga_read()
 	ut_assert("open color image", TGA_readImage(file_rgb, &img_color) == 0);
 	ut_assert("open gray image", TGA_readImage(file_gray, &img_gray) == 0);
 
-	uint8_t color_sequence[] = {0x00, 0x00, 0x00,
-				   0xff, 0x00, 0x00,
-				   0x00, 0xff, 0x00,
-				   0xff, 0xff, 0x00,
-				   0x00, 0x00, 0xff,
-				   0xff, 0x00, 0xff,
-				   0x00, 0xff, 0xff,
-				   0xff, 0xff, 0xff};
+	uint8_t color_sequence[3][8] = {{0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff},
+					{0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff},
+					{0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff}};
 
 	ut_assert("color image width", img_color->width == 4);
 	ut_assert("color image height", img_color->height == 2);
 	ut_assert("color image channels", img_color->channels == 3);
-	ut_assert("color image data", memcmp(img_color->data, color_sequence, 4 * 2 * 3 * sizeof(uint8_t)) == 0);
+
+	for (i = 0; i < 3; ++i) {
+		ut_assert("color image data", memcmp(img_color->data[i], color_sequence[i], 4 * 2 * sizeof(uint8_t)) == 0);
+	}
 
 	ut_assert("gray image width", img_gray->width == 256);
 	ut_assert("gray image height", img_gray->height == 256);
 	ut_assert("gray image channels", img_gray->channels == 1);
 
 	srand(time(NULL));
-	int i, error = 0;
 
 	for (i = 0; i < 1000; i++) {
 		int x = rand() % img_gray->width;
@@ -71,15 +69,11 @@ void test_tga_write()
 {
 	Image *image_color;
 	const char *file_rgb = "testimage_color.tga";
+	int i;
 
-	uint8_t color_sequence[] = {0x00, 0x00, 0x00,
-				   0xff, 0x00, 0x00,
-				   0x00, 0xff, 0x00,
-				   0xff, 0xff, 0x00,
-				   0x00, 0x00, 0xff,
-				   0xff, 0x00, 0xff,
-				   0x00, 0xff, 0xff,
-				   0xff, 0xff, 0xff};
+	uint8_t color_sequence[3][8] = {{0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff},
+					{0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff},
+					{0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff}};
 	size_t color_data_size = 42;
 	uint8_t image_color_data[] = {
 		0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -96,7 +90,10 @@ void test_tga_write()
 
 	ut_assert("write invalid image", TGA_writeImage(file_rgb, NULL) == 1);
 
-	memcpy(image_color->data, color_sequence, 4 * 2 * 3 * sizeof(uint8_t));
+	for (i = 0; i < 3; ++i) {
+		memcpy(image_color->data[i], color_sequence[i], 4 * 2 * sizeof(uint8_t));
+	}
+
 	ut_assert("write color image", TGA_writeImage(file_rgb, image_color) == 0);
 
 	uint8_t image_color_data_read[color_data_size];
@@ -131,7 +128,7 @@ void test_tga_write()
 		return;
 	}
 
-	memcpy(image_gray->data, gray_sequence, 4 * 2 * 1 * sizeof(uint8_t));
+	memcpy(image_gray->data[0], gray_sequence, 4 * 2 * 1 * sizeof(uint8_t));
 	ut_assert("write gray image", TGA_writeImage(file_gray, image_gray) == 0);
 
 	uint8_t image_gray_data_read[gray_data_size];
