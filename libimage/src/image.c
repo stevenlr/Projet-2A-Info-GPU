@@ -13,15 +13,15 @@
 // Modified from http://stackoverflow.com/a/1920516
 static void *aligned_malloc(size_t size, size_t align)
 {
-    void *mem = malloc(size + align * 2 + sizeof(void*));
-    void **ptr = (void **)((uintptr_t)(mem + align + sizeof(void*)) & ~(align - 1));
-    ptr[-1] = mem;
-    return ptr;
+	void *mem = malloc(size + align * 2 + sizeof(void*));
+	void **ptr = (void **)((uintptr_t)(mem + align + sizeof(void*)) & ~(align - 1));
+	ptr[-1] = mem;
+	return ptr;
 }
 
 static void aligned_free(void *ptr)
 {
-    free(((void**) ptr)[-1]);
+	free(((void**) ptr)[-1]);
 }
 
 int Image_new(int width, int height, int channels, Image **imageptr)
