@@ -37,27 +37,29 @@ int main(int argc, char *argv[])
 	}
 
 	if (test_image->height != ref_image->height ||
-		test_image->width != ref_image->width ) {
+		test_image->width != ref_image->width ||
+		test_image->channels != ref_image->channels) {
 		printf("Error : Images should be the same size.");
 		return 0;
 	}
 
-	int size, i;
+	int size, i, c;
 	uint8_t *datar, *datat, datad;
 	float average_difference = 0;
 
-	datar = ref_image->data;
-	datat = test_image->data;
-
 	size = ref_image->width * ref_image->height * ref_image->channels;
 
-	for (i = 0; i < size; ++i) {
+	for (c = 0; c < ref_image->channels; ++c) {
+		datar = ref_image->data[c];
+		datat = test_image->data[c];
 
-		datad = abs((*datar++) - (*datat++));
+		for (i = 0; i < size; ++i) {
+			datad = abs((*datar++) - (*datat++));
 
-		if (datad > 0) {
-			average_difference += datad;
-			++error;
+			if (datad > 0) {
+				average_difference += datad;
+				++error;
+			}
 		}
 	}
 
