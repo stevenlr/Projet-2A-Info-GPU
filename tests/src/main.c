@@ -13,7 +13,7 @@
 int main(int argc, char *argv[])
 {
 	if (argc < 3) {
-		printf("Usage: %s <type> <image1> <image2>\n", argv[0]);
+		printf("Usage: %s <image1> <image2>\n", argv[0]);
 		return 0;
 	}
 
