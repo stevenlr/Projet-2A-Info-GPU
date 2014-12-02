@@ -13,7 +13,7 @@
 int main(int argc, char *argv[])
 {
 	if (argc < 3) {
-		printf("Usage: %s <type> <image1> <image2>", argv[0]);
+		printf("Usage: %s <type> <image1> <image2>\n", argv[0]);
 		return 0;
 	}
 
@@ -24,22 +24,19 @@ int main(int argc, char *argv[])
 	char *file_path_test = argv[2];
 
 	if ((error = TGA_readImage(file_path_reference, &ref_image)) != 0) {
-		printf("Error when opening image: %d (%s)\n", error,
-			file_path_reference);
-		printf("%s", file_path_reference);
+		printf("Error when opening image: %d (%s)\n", error, file_path_reference);
 		return 0;
 	}
 
 	if ((error = TGA_readImage(file_path_test, &test_image)) != 0) {
 		printf("Error when opening image: %d (%s)\n", error, file_path_test);
-		printf("%s", file_path_test);
 		return 0;
 	}
 
 	if (test_image->height != ref_image->height ||
 		test_image->width != ref_image->width ||
 		test_image->channels != ref_image->channels) {
-		printf("Error : Images should be the same size.");
+		printf("Error : Images should be the same size.\n");
 		return 0;
 	}
 

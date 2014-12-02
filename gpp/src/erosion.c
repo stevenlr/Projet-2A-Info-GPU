@@ -46,45 +46,45 @@ void erosion(int argc, char *argv[])
 		return;
 	}
 
-	int x, y, c, i, size;
-	int line_offset, row_offset;
+	int c, i, size, x, y;
+	int line_offset;
 	uint8_t *in_data, *out_data;
 	uint8_t current_min;
 
-	in_data = input_image->data;
-	out_data = output_image->data;
-
-	line_offset = input_image->width * input_image->channels;
-	row_offset = input_image->channels;
-	size = input_image->width * input_image->height * input_image->channels;
+	line_offset = input_image->width;
+	size = input_image->width * input_image->height;
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	for (i = 0; i < size; ++i) {
-		c = i % input_image->channels;
-		x = ((i - c) / input_image->channels) % input_image->width;
-		y = ((i - c) / input_image->channels) / input_image->height;
-		current_min = *out_data;
+	for (c = 0; c < input_image->channels; ++c) {
+		in_data = input_image->data[c];
+		out_data = output_image->data[c];
 
-		int x1 = max(0, x - radius);
-		int x2 = min(input_image->width - 1, x + radius);
-		int y1 = max(0, y - radius);
-		int y2 = min(input_image->height - 1, y + radius);
-		int xx, yy;
+		for (i = 0; i < size; ++i) {
+			x = i % input_image->width;
+			y = i / input_image->width;
+			current_min = 0xff;
 
-		uint8_t *region = in_data + Image_getOffset(input_image, x1, y1) + c;
+			int x1 = max(0, x - radius);
+			int x2 = min(input_image->width - 1, x + radius);
+			int y1 = max(0, y - radius);
+			int y2 = min(input_image->height - 1, y + radius);
+			int xx, yy;
 
-		for (yy = y1; yy <= y2; ++yy) {
-			for (xx = x1; xx <= x2; ++xx) {
-				current_min = min(current_min, *region);
-				region += row_offset;
+			uint8_t *region = in_data + Image_getOffset(input_image, x1, y1);
+
+			for (yy = y1; yy <= y2; ++yy) {
+				for (xx = x1; xx <= x2; ++xx) {
+					current_min = min(current_min, *region);
+					++region;
+				}
+
+				region += line_offset - (x2 - x1 + 1);
 			}
 
-			region += line_offset - row_offset * (x2 - x1 + 1);
+			*out_data++ = current_min;
 		}
-
-		*out_data++ = current_min;
 	}
 
 	end_benchmark(&bench);
