@@ -124,7 +124,6 @@ void convolution(int argc, char *argv[])
 
 	int radius_x, radius_y;
 	int x, y, c;
-	uint8_t *out_data = output_image->data;
 
 	radius_x = (kernel.width - 1) / 2;
 	radius_y = (kernel.height - 1) / 2;
@@ -132,9 +131,12 @@ void convolution(int argc, char *argv[])
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	for (y = 0; y < input_image->height; ++y) {
-		for (x = 0; x < input_image->width; ++x) {
-			for (c = 0; c < input_image->channels; ++c) {
+	for (c = 0; c < input_image->channels; ++c) {
+		uint8_t *out_data = output_image->data[c];
+		
+		for (y = 0; y < input_image->height; ++y) {
+			for (x = 0; x < input_image->width; ++x) {
+				
 				int kx, ky;
 				float *kernel_data = kernel.data;
 				float sum = 0;

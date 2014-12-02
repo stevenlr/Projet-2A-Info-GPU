@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	} else if (strcmp(argv[1], "add") == 0) {
 		add(argc - 2, argv + 2);
 	} else if (strcmp(argv[1], "convolution") == 0) {
-		//convolution(argc - 2, argv + 2);
+		convolution(argc - 2, argv + 2);
 	} else if (strcmp(argv[1], "erosion") == 0) {
 		erosion(argc - 2, argv + 2);
 	} else {
