@@ -37,7 +37,8 @@ void add(int argc, char *argv[])
 	}
 
 	if (input_image1->height != input_image2->height ||
-		input_image1->width != input_image2->width ) {
+		input_image1->width != input_image2->width ||
+		input_image1->channels != input_image2->channels) {
 		printf("Error : Input images should be the same size.\n");
 		Image_delete(input_image1);
 		Image_delete(input_image2);
@@ -54,21 +55,24 @@ void add(int argc, char *argv[])
 		return;
 	}
 
-	int i, size;
+	int i, size, c;
 	uint8_t *datao, *data1, *data2;
 	uint16_t current_data;
 
-	datao = output_image->data;
-	data1 = input_image1->data;
-	data2 = input_image2->data;
-	size = input_image1->width * input_image1->height * input_image1->channels;
+	size = input_image1->width * input_image1->height;
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	for (i = 0; i < size; ++i) {
-		current_data = (*data1++) + (*data2++);
-		*datao++ = (current_data > 0xff) ? 0xff : current_data;
+	for (c = 0; c < input_image1->channels; ++c) {
+		datao = output_image->data[c];
+		data1 = input_image1->data[c];
+		data2 = input_image2->data[c];
+
+		for (i = 0; i < size; ++i) {
+			current_data = (*data1++) + (*data2++);
+			*datao++ = (current_data > 0xff) ? 0xff : current_data;
+		}
 	}
 
 	end_benchmark(&bench);

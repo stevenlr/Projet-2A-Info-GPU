@@ -38,18 +38,21 @@ void threshold(int argc, char *argv[])
 		return;
 	}
 
-	int i, size;
+	int i, size, c;
 	uint8_t *data;
 
-	data = output_image->data;
-	size = input_image->width * input_image->height * input_image->channels;
+	size = input_image->width * input_image->height;
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	for (i = 0; i < size; ++i) {
-		*data = (*data >= value) ? 0xff : 0x00;
-		++data;
+	for (c = 0; c < input_image->channels; ++c) {
+		data = output_image->data[c];
+
+		for (i = 0; i < size; ++i) {
+			*data = (*data >= value) ? 0xff : 0x00;
+			++data;
+		}
 	}
 
 	end_benchmark(&bench);

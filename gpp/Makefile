@@ -3,7 +3,7 @@ CFLAGS=-I../libimage/include -Iinclude -W -Wall -std=c99
 LDFLAGS=-L../libimage/lib -limage
 BIN=bin/filters-gpp.exe
 #SRC=$(wildcard src/*.c)
-SRC=src/main.c src/benchmark.c src/invert.c
+SRC=src/main.c src/benchmark.c src/invert.c src/threshold.c src/add.c
 OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
 BASENAME=$(patsubst src/%.c, %, $(SRC))
 HDR=$(wildcard include/*.h)
