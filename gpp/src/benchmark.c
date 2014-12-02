@@ -47,13 +47,13 @@ static void _measure_clock_frequency()
 	int i;
 
 	for (i = 0; i < 10; ++i) {
-		cs = clock();
 		s = _timestamp();
+		cs = clock();
 		while (cs == clock())
 			s = _timestamp();
 
-		cs = clock();
 		e = _timestamp();
+		cs = clock();
 		while (cs == clock())
 			e = _timestamp();
 
