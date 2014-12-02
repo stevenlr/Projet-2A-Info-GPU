@@ -35,17 +35,21 @@ void invert(int argc, char *argv[])
 		return;
 	}
 
-	int i, size;
-	uint8_t *data;
-
-	data = output_image->data;
-	size = input_image->width * input_image->height * input_image->channels;
-
+	int c, size;
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	for (i = 0; i < size; ++i)
-		*data++ ^= 0xff;
+	size = input_image->width * input_image->height;
+
+	for (c = 0; c < input_image->channels; ++c) {
+		int i;
+		uint8_t *data;
+
+		data = output_image->data[c];
+
+		for (i = 0; i < size; ++i)
+			*data++ ^= 0xff;
+	}
 
 	end_benchmark(&bench);
 	printf("%lu ", bench.elapsed_ticks);
