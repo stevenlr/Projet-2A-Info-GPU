@@ -57,6 +57,10 @@ void threshold(int argc, char *argv[])
 	} else {
 		value -= 1;
 		value ^= 0x80;
+
+		// Xoring by 0x80 maps 0-255 unsigned values to -128-127 signed values
+		// while preserving their order. (Equivalent to substracting 128)
+		// This step is necessary because SSE only compares signed integers.
 		
 		mask = _mm_setr_epi32(0x80808080, 0x80808080, 0x80808080, 0x80808080);
 		threshold = _mm_setr_epi8(
