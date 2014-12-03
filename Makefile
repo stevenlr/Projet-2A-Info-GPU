@@ -20,4 +20,7 @@ run_gpp:
 	cd gpp && $(MAKE) run
 
 run_tests_gpp:
-	cd tests && $(MAKE) run
+	cd tests && $(MAKE) run_gpp
+
+run_tests_sse:
+	cd tests && $(MAKE) run_sse

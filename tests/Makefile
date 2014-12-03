@@ -36,7 +36,10 @@ depend.d: $(SRC) $(HDR)
 	rm -f $@
 	for f in $(BASENAME); do $(CC) src/$$f.c $(CFLAGS) -MM -E -MT obj/$$f.o >> $@; done
 
-run: $(BIN)
+run_gpp: $(BIN)
 	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../gpp/output-images/$$f.tga ; done
+
+run_sse: $(BIN)
+	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../gpp-sse/output-images/$$f.tga ; done
 
 include depend.d
