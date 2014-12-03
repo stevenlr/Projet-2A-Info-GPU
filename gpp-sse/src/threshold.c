@@ -43,7 +43,7 @@ void threshold(int argc, char *argv[])
 
 	int size, c;
 	uint8_t *data, *data_end;
-	__m128i threshold, src, dst;
+	__m128i threshold, src, dst, mask;
 
 	size = input_image->width * input_image->height;
 
@@ -56,7 +56,9 @@ void threshold(int argc, char *argv[])
 		}
 	} else {
 		value -= 1;
-		value += 64;
+		value ^= 0x80;
+		
+		mask = _mm_setr_epi32(0x80808080, 0x80808080, 0x80808080, 0x80808080);
 		threshold = _mm_setr_epi8(
 			value, value, value, value,
 			value, value, value, value,
@@ -70,6 +72,7 @@ void threshold(int argc, char *argv[])
 
 			while (data < data_end) {
 				src = _mm_load_si128((__m128i *) data);
+				src = _mm_xor_si128(src, mask);
 				dst = _mm_cmpgt_epi8(src, threshold);
 				_mm_store_si128((__m128i *) data, dst);
 				data += 16;
