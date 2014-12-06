@@ -10,6 +10,7 @@
 #include <float.h>
 #include <image/image.h>
 #include <image/tga.h>
+#include <tmmintrin.h>
 
 #include "convolution.h"
 #include "benchmark.h"
