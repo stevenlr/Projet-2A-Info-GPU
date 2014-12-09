@@ -1,4 +1,4 @@
-.PHONY: all clean cleanall run_gpp run_tests_gpp
+.PHONY: all clean cleanall run_gpp run_sse run_tests_gpp run_tests_sse
 
 all:
 	cd libimage && $(MAKE)
