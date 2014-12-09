@@ -7,7 +7,13 @@
 #ifndef _IMAGE_H
 #define _IMAGE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
+
+
 
 /**
  * Image data structure.
@@ -79,5 +85,9 @@ uint8_t Image_getPixel(Image *image, int x, int y, int c);
  * @param value Value of the pixel.
  */
 void Image_setPixel(Image *image, int x, int y, int c, uint8_t value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
