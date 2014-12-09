@@ -46,8 +46,6 @@ static void _measure_clock_frequency()
 	}
 
 	_clock_frequency = total / 10;
-
-	printf("%lu\n", _clock_frequency);
 }
 
 void start_benchmark(Benchmark *benchmark)
