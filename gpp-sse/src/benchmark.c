@@ -39,11 +39,10 @@ static void _measure_clock_frequency()
 			s = _timestamp();
 
 		e = _timestamp();
-		cs = clock();
-		while (cs == clock())
+		while (clock() <= cs + 10)
 			e = _timestamp();
 
-		total += (e - s) * CLOCKS_PER_SEC;
+		total += (e - s) * CLOCKS_PER_SEC / 10;
 	}
 
 	_clock_frequency = total / 10;
