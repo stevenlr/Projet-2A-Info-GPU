@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=-I../libimage/include -Iinclude -IC:\IntelTBB\include -W -Wall -O3 -std=c++11
-LDFLAGS=-L../libimage/lib -limage -LC:\IntelTBB\lib\ia32\vc12 -ltbb
+LDFLAGS=-L../libimage/lib -limage -LC:\IntelTBB\bin\mingw32 -ltbb
 BIN=bin/filters-gpp-intelTBB.exe
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, obj/%.o, $(SRC))

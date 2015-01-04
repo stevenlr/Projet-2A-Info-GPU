@@ -17,6 +17,29 @@
 using namespace std;
 using namespace tbb;
 
+class AddParallel 
+{
+public:
+	AddParallel(Image *i1, Image *i2, Image *o) :
+		i1(i1), i2(i2), o(o)
+ 	{ }
+
+	void operator()(int i) const
+	{
+		uint16_t current_data;
+
+		for(int j = 0; j < i1->channels; ++j) {
+			current_data = i1->data[j][i] + i2->data[j][i];
+			o->data[j][i] = (current_data > 0xff) ? 0xff : current_data;
+		}
+	}
+
+private:
+	Image *i1;
+	Image *i2;
+	Image *o;
+};
+
 void add(int argc, char *argv[])
 {
 	if (argc != 3) {
@@ -59,25 +82,15 @@ void add(int argc, char *argv[])
 		return;
 	}
 
-	int size, c;
-	uint8_t *datao, *data1, *data2;
-	uint16_t current_data;
+	int size;
+	AddParallel addParallel(input_image1, input_image2, output_image);
 
 	size = input_image1->width * input_image1->height;
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for (0, input_image1->channels, [&](int i) {
-		datao = output_image->data[c];
-		data1 = input_image1->data[c];
-		data2 = input_image2->data[c];
-
-		for (i = 0; i < size; ++i) {
-			current_data = (*data1++) + (*data2++);
-			*datao++ = (current_data > 0xff) ? 0xff : current_data;
-		}
-	} );
+	parallel_for(0, size, addParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;
