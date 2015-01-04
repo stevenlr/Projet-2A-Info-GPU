@@ -28,7 +28,7 @@ public:
 	void operator()(int i) const
 	{
 		for(int j = 0; j < output_image->channels; ++j) {
-			output_image->data[j][i] = (output_image->data[j][i] >= value) ? 0xff : 0x00;;
+			output_image->data[j][i] = (output_image->data[j][i] >= value) ? 0xff : 0x00;
 		}
 	}
 
