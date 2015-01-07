@@ -1,5 +1,5 @@
 /**
- * @file add.c
+ * @file invert.c
  * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
  * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
  */
@@ -11,28 +11,38 @@
 #include <image/tga.h>
 #include <tbb/tbb.h>
 
-#include "add.h"
+#include "invert.h"
 #include "benchmark.h"
 
 using namespace std;
 using namespace tbb;
-
-class InvertParallel 
+class InvertParallel
 {
 public:
-	InvertParallel(Image *output_image) :
-		output_image(output_image)
+	InvertParallel(Image *output_image, int nbParts) :
+		output_image(output_image), nbParts(nbParts)
  	{ }
 
-	void operator()(int i) const
+	void operator()(int p) const
 	{
-		for(int j = 0; j < output_image->channels; ++j) {
-			output_image->data[j][i] ^= 0xff;
+		uint8_t *datao;
+		int c, size, i, partSize, beginPart;
+		size = output_image->width * output_image->height;
+		partSize = size/nbParts;
+		beginPart = partSize * p;
+
+		for (c = 0; c < output_image->channels; ++c) {
+			datao = output_image->data[c] + beginPart;
+
+			for (i = 0; i < partSize; ++i) {
+				*datao++ ^= 0xff;
+			}
 		}
 	}
 
 private:
 	Image *output_image;
+	int nbParts;
 };
 
 void invert(int argc, char *argv[])
@@ -57,14 +67,14 @@ void invert(int argc, char *argv[])
 		return;
 	}
 
-	int size;
-	InvertParallel invertParallel(output_image);
+	int nbParts = 8; 
+
+	InvertParallel invertParallel(output_image, nbParts);
+
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	size = input_image->width * input_image->height;
-	
-	parallel_for(0, size, invertParallel);
+	parallel_for(0, nbParts, invertParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;
