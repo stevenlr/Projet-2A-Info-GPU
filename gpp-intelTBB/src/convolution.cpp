@@ -99,19 +99,18 @@ class ConvolutionParallel
 public:
 	ConvolutionParallel(Image *input_image, Image *output_image, Kernel kernel, int nbParts) :
 		input_image(input_image), output_image(output_image), nbParts(nbParts), kernel(kernel)
- 	{ }
+ 	{
+ 		radius_x = (kernel.width - 1) / 2;
+		radius_y = (kernel.height - 1) / 2;
+		size = input_image->width * input_image->height;
+		partSize = size/nbParts;
+ 	}
 
 	void operator()(int p) const
 	{
-		int c, i, x, y, size, partSize, beginPart;
-		int radius_x, radius_y;
+		int c, i, x, y, beginPart;
 
-		size = input_image->width * input_image->height;
-		partSize = size/nbParts;
 		beginPart = partSize * p;
-
-		radius_x = (kernel.width - 1) / 2;
-		radius_y = (kernel.height - 1) / 2;
 
 		for (c = 0; c < input_image->channels; ++c) {
 			uint8_t *out_data = output_image->data[c] + beginPart;
@@ -145,6 +144,10 @@ private:
 	Image *output_image;
 	int nbParts;
 	Kernel kernel;
+	int radius_x;
+	int radius_y;
+	int size;
+	int partSize;
 };
 
 void convolution(int argc, char *argv[])

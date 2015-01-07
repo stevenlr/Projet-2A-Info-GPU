@@ -210,15 +210,16 @@ class AddParallel
 public:
 	AddParallel(Image *input_image1, Image *input_image2, Image *output_image, int nbParts) :
 		input_image1(input_image1), input_image2(input_image2), output_image(output_image), nbParts(nbParts)
- 	{ }
+ 	{
+ 		size = input_image1->width * input_image1->height;
+		partSize = size/nbParts;
+ 	}
 
 	void operator()(int p) const
 	{
 		uint16_t current_data;
 		uint8_t *data1, *data2, *datao;
-		int c, size, i, partSize, beginPart;
-		size = input_image1->width * input_image1->height;
-		partSize = size/nbParts;
+		int c, i, beginPart;
 		beginPart = partSize * p;
 
 		for (c = 0; c < input_image1->channels; ++c) {
@@ -238,6 +239,8 @@ private:
 	Image *input_image2;
 	Image *output_image;
 	int nbParts;
+	int size;
+	int partSize;
 };
 
 void add(int argc, char *argv[])

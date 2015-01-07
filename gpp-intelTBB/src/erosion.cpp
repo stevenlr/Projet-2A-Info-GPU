@@ -25,23 +25,24 @@ class ErosionParallel
 public:
 	ErosionParallel(Image *input_image, Image *output_image, int radius, int nbParts) :
 		input_image(input_image), output_image(output_image), nbParts(nbParts), radius(radius)
- 	{ }
+ 	{ 
+		size = input_image->width * input_image->height;
+		partSize = size/nbParts;
+ 	}
 
 	void operator()(int p) const
 	{
-		int c, i, size, x, y, partSize, beginPart;
+		int c, i, x, y, beginPart;
 		int line_offset;
 		uint8_t *in_data, *out_data;
 		uint8_t current_min;
 
-		size = input_image->width * input_image->height;
-		partSize = size/nbParts;
 		beginPart = partSize * p;
 		line_offset = input_image->width;
 
 		for (c = 0; c < input_image->channels; ++c) {
-		in_data = input_image->data[c];
-		out_data = output_image->data[c] + beginPart;
+			in_data = input_image->data[c];
+			out_data = output_image->data[c] + beginPart;
 
 			for (i = 0; i < partSize; ++i) {
 				x = (i + beginPart) % input_image->width;
@@ -75,6 +76,8 @@ private:
 	Image *output_image;
 	int nbParts;
 	int radius;
+	int size;
+	int partSize;
 };
 
 void erosion(int argc, char *argv[])

@@ -21,14 +21,15 @@ class InvertParallel
 public:
 	InvertParallel(Image *output_image, int nbParts) :
 		output_image(output_image), nbParts(nbParts)
- 	{ }
+ 	{ 
+		size = output_image->width * output_image->height;
+		partSize = size/nbParts;
+ 	}
 
 	void operator()(int p) const
 	{
 		uint8_t *datao;
-		int c, size, i, partSize, beginPart;
-		size = output_image->width * output_image->height;
-		partSize = size/nbParts;
+		int c, i, beginPart;
 		beginPart = partSize * p;
 
 		for (c = 0; c < output_image->channels; ++c) {
@@ -43,6 +44,8 @@ public:
 private:
 	Image *output_image;
 	int nbParts;
+	int size;
+	int partSize;
 };
 
 void invert(int argc, char *argv[])
