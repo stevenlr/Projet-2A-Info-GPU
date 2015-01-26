@@ -4,9 +4,10 @@
  * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
  */
 
-#include <cstdint>
-#include <ctime>
-#include <cstdlib>
+#include <stdint.h>
+#include <time.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "benchmark.h"
 
@@ -38,10 +39,10 @@ static void _measure_clock_frequency()
 			s = _timestamp();
 
 		e = _timestamp();
-		while (clock() <= cs + 10)
+		while (clock() <= cs + 100)
 			e = _timestamp();
 
-		total += (e - s) * CLOCKS_PER_SEC / 10;
+		total += (e - s) * CLOCKS_PER_SEC / 100;
 	}
 
 	_clock_frequency = total / 10;
