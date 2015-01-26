@@ -14,6 +14,8 @@
 #include "add.h"
 #include "benchmark.h"
 
+#include <emmintrin.h>
+
 using namespace std;
 using namespace tbb;
 
@@ -26,17 +28,23 @@ public:
 
 	void operator()(int i) const
 	{
-		uint16_t current_data;
-		uint8_t *datai1, *datai2, *datao;
+		uint8_t *data1, *data2, *datao;
+		__m128i v1, v2, res;
 
 		for (int c = 0; c < i1->channels; ++c) {
-			datai1 = i1->data[c] + i * i1->width;
-			datai2 = i2->data[c] + i * i1->width;
+			data1 = i1->data[c] + i * i1->width;
+			data2 = i2->data[c] + i * i1->width;
 			datao = o->data[c] + i * i1->width;
 
-			for (int j = 0; j < i1->width; ++j) {
-				current_data = (*datai1++) + (*datai2++);
-				*datao++ = (current_data > 0xff) ? 0xff : current_data;
+			for (int j = 0; j < i1->width; j += 16) {
+				v1 = _mm_load_si128((__m128i *) data1);
+				v2 = _mm_load_si128((__m128i *) data2);
+				res = _mm_adds_epu8(v1, v2);
+				_mm_store_si128((__m128i *) datao, res);
+
+				datao += 16;
+				data1 += 16;
+				data2 += 16;
 			}
 		}
 	}

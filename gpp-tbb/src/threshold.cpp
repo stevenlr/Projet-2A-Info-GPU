@@ -11,9 +11,10 @@
 #include <image/tga.h>
 #include <tbb/tbb.h>
 
-
 #include "threshold.h"
 #include "benchmark.h"
+
+#include <emmintrin.h>
 
 using namespace std;
 using namespace tbb;
@@ -23,18 +24,31 @@ class ThresholdParallel
 public:
 	ThresholdParallel(Image *output_image, uint8_t value) :
 		output_image(output_image), value(value)
- 	{ }
+ 	{ 
+ 		mask = _mm_setr_epi32(0x80808080, 0x80808080, 0x80808080, 0x80808080);
+		threshold = _mm_setr_epi8(
+			value, value, value, value,
+			value, value, value, value,
+			value, value, value, value,
+			value, value, value, value
+		);
+ 	}
 
 	void operator()(int i) const
 	{
-		uint8_t *out_data;
+		uint8_t *data, *data_end;
+		__m128i src, dst;
 
 		for (int c = 0; c < output_image->channels; ++c) {
-			out_data = output_image->data[c] + i * output_image->width;
+			data = output_image->data[c] + i * output_image->width;
+			data_end = data + output_image->width;
 
-			for (int j = 0; j < output_image->width; ++j) {
-				*out_data = (*out_data >= value) ? 0xff : 0x00;
-				out_data++;
+			while (data < data_end) {
+				src = _mm_load_si128((__m128i *) data);
+				src = _mm_xor_si128(src, mask);
+				dst = _mm_cmpgt_epi8(src, threshold);
+				_mm_store_si128((__m128i *) data, dst);
+				data += 16;
 			}
 		}
 	}
@@ -42,9 +56,7 @@ public:
 private:
 	Image *output_image;
 	uint8_t value;
-	int nbParts;
-	int size;
-	int partSize;
+	__m128i mask, threshold;
 };
 
 void threshold(int argc, char *argv[])
@@ -72,12 +84,20 @@ void threshold(int argc, char *argv[])
 		return;
 	}
 
-	ThresholdParallel thresholdParallel(output_image, value);
-
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, output_image->width, thresholdParallel);
+	if (value == 0) {
+		int size = input_image->width * input_image->height;
+		
+		for (int c = 0; c < input_image->channels; ++c) {
+			memset(output_image->data[c], 0xff, size * sizeof(uint8_t));
+		}
+	} else {
+		ThresholdParallel thresholdParallel(output_image, value);
+
+		parallel_for(0, output_image->width, thresholdParallel);
+	}
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;
