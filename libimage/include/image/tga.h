@@ -7,6 +7,10 @@
 #ifndef _TGA_H
 #define _TGA_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "image/image.h"
 
 /**
@@ -28,5 +32,9 @@ int TGA_readImage(const char *filename, Image **imageptr);
  *         1 if there was an error when writing the image.
  */
 int TGA_writeImage(const char *filename, Image *image);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
