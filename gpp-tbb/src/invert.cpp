@@ -19,23 +19,19 @@ using namespace tbb;
 class InvertParallel
 {
 public:
-	InvertParallel(Image *output_image, int nbParts) :
-		output_image(output_image), nbParts(nbParts)
- 	{ 
-		size = output_image->width * output_image->height;
-		partSize = size/nbParts;
- 	}
+	InvertParallel(Image *output_image) :
+		output_image(output_image)
+ 	{ }
 
-	void operator()(int p) const
+	void operator()(int i) const
 	{
 		uint8_t *datao;
-		int c, i, beginPart;
-		beginPart = partSize * p;
+		int c, j;
 
 		for (c = 0; c < output_image->channels; ++c) {
-			datao = output_image->data[c] + beginPart;
+			datao = output_image->data[c] + i * output_image->width;
 
-			for (i = 0; i < partSize; ++i) {
+			for (j = 0; j < output_image->width; ++j) {
 				*datao++ ^= 0xff;
 			}
 		}
@@ -43,9 +39,6 @@ public:
 
 private:
 	Image *output_image;
-	int nbParts;
-	int size;
-	int partSize;
 };
 
 void invert(int argc, char *argv[])
@@ -70,14 +63,12 @@ void invert(int argc, char *argv[])
 		return;
 	}
 
-	int nbParts = 8; 
-
-	InvertParallel invertParallel(output_image, nbParts);
+	InvertParallel invertParallel(output_image);
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, nbParts, invertParallel);
+	parallel_for(0, input_image->height, invertParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;

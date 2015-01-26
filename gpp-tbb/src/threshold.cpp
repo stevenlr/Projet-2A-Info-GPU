@@ -21,24 +21,18 @@ using namespace tbb;
 class ThresholdParallel 
 {
 public:
-	ThresholdParallel(Image *output_image, uint8_t value, int nbParts) :
-		output_image(output_image), value(value), nbParts(nbParts)
- 	{ 
- 		size = output_image->width * output_image->height;
-		partSize = size/nbParts;
- 	}
+	ThresholdParallel(Image *output_image, uint8_t value) :
+		output_image(output_image), value(value)
+ 	{ }
 
-	void operator()(int p) const
+	void operator()(int i) const
 	{
-		int beginPart;
 		uint8_t *out_data;
 
-		beginPart = partSize * p;
-
 		for (int c = 0; c < output_image->channels; ++c) {
-			out_data = output_image->data[c] + beginPart;
+			out_data = output_image->data[c] + i * output_image->width;
 
-			for (int i = 0; i < partSize; ++i) {
+			for (int j = 0; j < output_image->width; ++j) {
 				*out_data = (*out_data >= value) ? 0xff : 0x00;
 				out_data++;
 			}
@@ -78,14 +72,12 @@ void threshold(int argc, char *argv[])
 		return;
 	}
 
-	int nbParts = 8; 
-
-	ThresholdParallel thresholdParallel(output_image, value, nbParts);
+	ThresholdParallel thresholdParallel(output_image, value);
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, nbParts, thresholdParallel);
+	parallel_for(0, output_image->width, thresholdParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;

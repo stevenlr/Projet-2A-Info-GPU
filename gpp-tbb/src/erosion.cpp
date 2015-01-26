@@ -23,34 +23,28 @@ using namespace tbb;
 class ErosionParallel 
 {
 public:
-	ErosionParallel(Image *input_image, Image *output_image, int radius, int nbParts) :
-		input_image(input_image), output_image(output_image), nbParts(nbParts), radius(radius)
- 	{ 
-		size = input_image->width * input_image->height;
-		partSize = size/nbParts;
- 	}
+	ErosionParallel(Image *input_image, Image *output_image, int radius) :
+		input_image(input_image), output_image(output_image), radius(radius)
+ 	{ }
 
-	void operator()(int p) const
+	void operator()(int i) const
 	{
-		int c, i, x, y, beginPart;
-		int line_offset;
+		int c, j, x, y;
 		uint8_t *in_data, *out_data;
 		uint8_t current_min;
-
-		beginPart = partSize * p;
-		line_offset = input_image->width;
+		int line_offset = input_image->width;
 
 		for (c = 0; c < input_image->channels; ++c) {
 			in_data = input_image->data[c];
-			out_data = output_image->data[c] + beginPart;
+			out_data = output_image->data[c] + i * line_offset;
+			y = i;
 
-			for (i = 0; i < partSize; ++i) {
-				x = (i + beginPart) % input_image->width;
-				y = (i + beginPart) / input_image->width;
+			for (j = 0; j < line_offset; ++j) {
+				x = j;
 				current_min = 0xff;
 
 				int x1 = max(0, x - radius);
-				int x2 = min(input_image->width - 1, x + radius);
+				int x2 = min(line_offset - 1, x + radius);
 				int y1 = max(0, y - radius);
 				int y2 = min(input_image->height - 1, y + radius);
 				int xx, yy;
@@ -74,10 +68,7 @@ public:
 private:
 	Image *input_image;
 	Image *output_image;
-	int nbParts;
 	int radius;
-	int size;
-	int partSize;
 };
 
 void erosion(int argc, char *argv[])
@@ -110,14 +101,12 @@ void erosion(int argc, char *argv[])
 		return;
 	}
 
-	int nbParts = 8; 
-
-	ErosionParallel erosionParallel(input_image, output_image, radius, nbParts);
+	ErosionParallel erosionParallel(input_image, output_image, radius);
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, nbParts, erosionParallel);
+	parallel_for(0, input_image->height, erosionParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;
