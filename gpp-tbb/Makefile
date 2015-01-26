@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=-I../libimage/include -Iinclude -IC:\IntelTBB\include -W -Wall -O3 -std=c++11
 LDFLAGS=-L../libimage/lib -limage -LC:\IntelTBB\bin\mingw32 -ltbb
-BIN=bin/filters-gpp-intelTBB.exe
+BIN=bin/filters-gpp-tbb.exe
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, obj/%.o, $(SRC))
 BASENAME=$(patsubst src/%.cpp, %, $(SRC))
@@ -28,7 +28,7 @@ clean:
 	rm -rf obj
 
 cleanall: clean
-	rm -rf bin/filters-gpp-intelTBB.exe
+	rm -rf $(BIN)
 	rm -rf output-images
 
 output-images:
