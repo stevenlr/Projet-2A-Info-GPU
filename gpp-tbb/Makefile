@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-I../libimage/include -Iinclude -IC:\IntelTBB\include -W -Wall -O3 -std=c++11
+CXXFLAGS=-I../libimage/include -Iinclude -IC:\IntelTBB\include -W -Wall -O3 -std=c++11 -msse -msse2 -mssse3
 LDFLAGS=-L../libimage/lib -limage -LC:\IntelTBB\bin\mingw32 -ltbb
 BIN=bin/filters-gpp-tbb.exe
 SRC=$(wildcard src/*.cpp)

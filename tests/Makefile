@@ -42,4 +42,6 @@ run_gpp: $(BIN)
 run_sse: $(BIN)
 	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../gpp-sse/output-images/$$f.tga ; done
 
+run_tbb: $(BIN)
+	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../gpp-tbb/output-images/$$f.tga ; done
 include depend.d

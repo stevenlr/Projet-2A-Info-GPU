@@ -14,38 +14,42 @@
 #include "invert.h"
 #include "benchmark.h"
 
+#include <emmintrin.h>
+
 using namespace std;
 using namespace tbb;
+
 class InvertParallel
 {
 public:
-	InvertParallel(Image *output_image, int nbParts) :
-		output_image(output_image), nbParts(nbParts)
+	InvertParallel(Image *output_image) :
+		output_image(output_image)
  	{ 
-		size = output_image->width * output_image->height;
-		partSize = size/nbParts;
+ 		mask = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
  	}
 
-	void operator()(int p) const
+	void operator()(int i) const
 	{
-		uint8_t *datao;
-		int c, i, beginPart;
-		beginPart = partSize * p;
+		uint8_t *datao, *data_end;
+		int c;
+		__m128i src, dst;
 
 		for (c = 0; c < output_image->channels; ++c) {
-			datao = output_image->data[c] + beginPart;
+			datao = output_image->data[c] + i * output_image->width;
+			data_end = datao + output_image->width;
 
-			for (i = 0; i < partSize; ++i) {
-				*datao++ ^= 0xff;
+			while (datao < data_end) {
+				src = _mm_load_si128((__m128i *) datao);
+				dst = _mm_xor_si128(src, mask);
+				_mm_store_si128((__m128i *) datao, dst);
+				datao += 16;
 			}
 		}
 	}
 
 private:
 	Image *output_image;
-	int nbParts;
-	int size;
-	int partSize;
+	__m128i mask;
 };
 
 void invert(int argc, char *argv[])
@@ -70,14 +74,12 @@ void invert(int argc, char *argv[])
 		return;
 	}
 
-	int nbParts = 8; 
-
-	InvertParallel invertParallel(output_image, nbParts);
+	InvertParallel invertParallel(output_image);
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, nbParts, invertParallel);
+	parallel_for(0, input_image->height, invertParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;

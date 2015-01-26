@@ -97,31 +97,26 @@ void kernel_delete(Kernel kernel)
 class ConvolutionParallel 
 {
 public:
-	ConvolutionParallel(Image *input_image, Image *output_image, Kernel kernel, int nbParts) :
-		input_image(input_image), output_image(output_image), nbParts(nbParts), kernel(kernel)
+	ConvolutionParallel(Image *input_image, Image *output_image, Kernel kernel) :
+		input_image(input_image), output_image(output_image), kernel(kernel)
  	{
  		radius_x = (kernel.width - 1) / 2;
 		radius_y = (kernel.height - 1) / 2;
-		size = input_image->width * input_image->height;
-		partSize = size/nbParts;
  	}
 
-	void operator()(int p) const
+	void operator()(int i) const
 	{
-		int c, i, x, y, beginPart;
-
-		beginPart = partSize * p;
+		int c, j, x, y;
 
 		for (c = 0; c < input_image->channels; ++c) {
-			uint8_t *out_data = output_image->data[c] + beginPart;
-			
-			for (i = 0; i < partSize; ++i) {
-				x = (i + beginPart) % input_image->width;
-				y = (i + beginPart) / input_image->width;
-					
+			uint8_t *out_data = output_image->data[c] + i * input_image->width;
+			y = i;
+
+			for (j = 0; j < input_image->width; ++j) {
 				int kx, ky;
 				float *kernel_data = kernel.data;
 				float sum = 0;
+				x = j;
 
 				for (ky = -radius_y; ky <= radius_y; ++ky) {
 					for (kx = -radius_x; kx <= radius_x; ++kx) {
@@ -142,12 +137,9 @@ public:
 private:
 	Image *input_image;
 	Image *output_image;
-	int nbParts;
 	Kernel kernel;
 	int radius_x;
 	int radius_y;
-	int size;
-	int partSize;
 };
 
 void convolution(int argc, char *argv[])
@@ -182,16 +174,14 @@ void convolution(int argc, char *argv[])
 		Image_delete(input_image);
 		Image_delete(output_image);
 		return;
-	}
+	} 
 
-	int nbParts = 8; 
-
-	ConvolutionParallel convolutionParallel(input_image, output_image, kernel, nbParts);
+	ConvolutionParallel convolutionParallel(input_image, output_image, kernel);
 
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, nbParts, convolutionParallel);
+	parallel_for(0, input_image->width, convolutionParallel);
 
 	end_benchmark(&bench);
 	cout << bench.elapsed_ticks << endl;
