@@ -1,0 +1,6 @@
+Réunion 10 décembre 2014
+=========================
+
+ * Rencontre avec l'entreprise.
+ * Présentation de l'école. (Hugo Descoubes)
+ * Présentation des benchmarks (GPP et SSE) et prototypes (Pandore).

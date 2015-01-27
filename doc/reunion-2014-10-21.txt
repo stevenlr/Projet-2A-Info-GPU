@@ -10,7 +10,7 @@ Ordre d'exécution :
 1) GPU -> NVidia -> CUDA
 2) Intel IGP
 
-Contacter "Emmanuelle Cagmiot"
+Contacter "Emmanuelle Cagniot"
 - Appel + RDV
 - Questions => Avantages Inconvénients des APIs...
 
