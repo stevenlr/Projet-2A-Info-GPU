@@ -22,8 +22,8 @@ using namespace tbb;
 class InvertParallel
 {
 public:
-	InvertParallel(Image *output_image) :
-		output_image(output_image)
+	InvertParallel(Image *output_image, int channel) :
+		output_image(output_image), c(channel)
  	{ 
  		mask = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
  	}
@@ -31,25 +31,23 @@ public:
 	void operator()(int i) const
 	{
 		uint8_t *datao, *data_end;
-		int c;
 		__m128i src, dst;
 
-		for (c = 0; c < output_image->channels; ++c) {
-			datao = output_image->data[c] + i * output_image->width;
-			data_end = datao + output_image->width;
+		datao = output_image->data[c] + i * output_image->width;
+		data_end = datao + output_image->width;
 
-			while (datao < data_end) {
-				src = _mm_load_si128((__m128i *) datao);
-				dst = _mm_xor_si128(src, mask);
-				_mm_store_si128((__m128i *) datao, dst);
-				datao += 16;
-			}
+		while (datao < data_end) {
+			src = _mm_load_si128((__m128i *) datao);
+			dst = _mm_xor_si128(src, mask);
+			_mm_store_si128((__m128i *) datao, dst);
+			datao += 16;
 		}
 	}
 
 private:
 	Image *output_image;
 	__m128i mask;
+	int c;
 };
 
 void invert(int argc, char *argv[])
@@ -74,15 +72,16 @@ void invert(int argc, char *argv[])
 		return;
 	}
 
-	InvertParallel invertParallel(output_image);
-
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, input_image->height, invertParallel);
+	for (int i = 0; i < input_image->channels; ++i) {
+		InvertParallel invertParallel(output_image, i);
+		parallel_for(0, input_image->height, invertParallel);
+	}
 
 	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << endl;
+	cout << bench.elapsed_ticks << " ";
 	cout << bench.elapsed_time << endl;
 
 	if ((error = TGA_writeImage(argv[1], output_image)) != 0) {

@@ -184,7 +184,7 @@ void convolution(int argc, char *argv[])
 	parallel_for(0, input_image->width, convolutionParallel);
 
 	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << endl;
+	cout << bench.elapsed_ticks << " ";
 	cout << bench.elapsed_time << endl;
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {

@@ -26,57 +26,55 @@ using namespace tbb;
 class ErosionParallel 
 {
 public:
-	ErosionParallel(Image *input_image, Image *output_image, int radius, uint8_t *data_store) :
-		input_image(input_image), output_image(output_image), radius(radius), data_store(data_store)
+	ErosionParallel(Image *input_image, Image *output_image, int radius, uint8_t *data_store, int channel) :
+		input_image(input_image), output_image(output_image), radius(radius), data_store(data_store), c(channel)
  	{ }
 
 	void operator()(int i) const
 	{
-		int c, j, x, y;
+		int j, x, y;
 		uint8_t *in_data, *out_data;
 		uint8_t current_min;
 		int line_offset = input_image->width;
 		__m128i src, tmpmin;
 
-		for (c = 0; c < input_image->channels; ++c) {
-			in_data = input_image->data[c];
-			out_data = output_image->data[c] + i * line_offset;
-			y = i;
+		in_data = input_image->data[c];
+		out_data = output_image->data[c] + i * line_offset;
+		y = i;
 
-			for (j = 0; j < line_offset; j += 16) {
-				x = j;
-				current_min = 0xff;
+		for (j = 0; j < line_offset; j += 16) {
+			x = j;
+			current_min = 0xff;
 
-				int x1 = max(0, x - radius);
-				int x2 = min(input_image->width - 1, x + radius);
-				int y1 = max(0, y - radius);
-				int y2 = min(input_image->height - 1, y + radius);
-				int xx, yy;
-				
-				for (xx = x1; xx <= x2; xx += 16) {
-					uint8_t *region = in_data + Image_getOffset(input_image, x1, y1);
+			int x1 = max(0, x - radius);
+			int x2 = min(input_image->width - 1, x + radius);
+			int y1 = max(0, y - radius);
+			int y2 = min(input_image->height - 1, y + radius);
+			int xx, yy;
+			
+			for (xx = x1; xx <= x2; xx += 16) {
+				uint8_t *region = in_data + Image_getOffset(input_image, x1, y1);
 
-					tmpmin = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
+				tmpmin = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
 
-					for (yy = y1; yy <= y2; ++yy) {
-						src = _mm_loadu_si128((__m128i *) region);
-						tmpmin = _mm_min_epu8(src, tmpmin);
-						region += line_offset;
-					}
-
-					_mm_store_si128((__m128i *) data_store, tmpmin);
-					uint8_t *data_storeptr;
-					uint8_t *data_storeptr_end;
-
-					data_storeptr = data_store;
-					data_storeptr_end = data_storeptr +  min(xx + 16, x2 + 1) - xx;
-
-					for (; data_storeptr < data_storeptr_end; ++data_storeptr)
-						current_min = min(current_min, *data_storeptr);
+				for (yy = y1; yy <= y2; ++yy) {
+					src = _mm_loadu_si128((__m128i *) region);
+					tmpmin = _mm_min_epu8(src, tmpmin);
+					region += line_offset;
 				}
 
-				*out_data++ = current_min;
+				_mm_store_si128((__m128i *) data_store, tmpmin);
+				uint8_t *data_storeptr;
+				uint8_t *data_storeptr_end;
+
+				data_storeptr = data_store;
+				data_storeptr_end = data_storeptr +  min(xx + 16, x2 + 1) - xx;
+
+				for (; data_storeptr < data_storeptr_end; ++data_storeptr)
+					current_min = min(current_min, *data_storeptr);
 			}
+
+			*out_data++ = current_min;
 		}
 	}
 
@@ -85,6 +83,7 @@ private:
 	Image *output_image;
 	int radius;
 	uint8_t *data_store;
+	int c;
 };
 
 void erosion(int argc, char *argv[])
@@ -128,15 +127,16 @@ void erosion(int argc, char *argv[])
 		return;
 	}
 
-	ErosionParallel erosionParallel(input_image, output_image, radius, data_store);
-
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, input_image->height, erosionParallel);
+	for (int i = 0; i < input_image->channels; ++i) {
+		ErosionParallel erosionParallel(input_image, output_image, radius, data_store, i);
+		parallel_for(0, input_image->height, erosionParallel);
+	}
 
 	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << endl;
+	cout << bench.elapsed_ticks << " ";
 	cout << bench.elapsed_time << endl;
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {

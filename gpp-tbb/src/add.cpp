@@ -22,8 +22,8 @@ using namespace tbb;
 class AddParallel 
 {
 public:
-	AddParallel(Image *i1, Image *i2, Image *o) :
-		i1(i1), i2(i2), o(o)
+	AddParallel(Image *i1, Image *i2, Image *o, int channel) :
+		i1(i1), i2(i2), o(o), c(channel)
  	{ }
 
 	void operator()(int i) const
@@ -31,21 +31,19 @@ public:
 		uint8_t *data1, *data2, *datao;
 		__m128i v1, v2, res;
 
-		for (int c = 0; c < i1->channels; ++c) {
-			data1 = i1->data[c] + i * i1->width;
-			data2 = i2->data[c] + i * i1->width;
-			datao = o->data[c] + i * i1->width;
+		data1 = i1->data[c] + i * i1->width;
+		data2 = i2->data[c] + i * i1->width;
+		datao = o->data[c] + i * i1->width;
 
-			for (int j = 0; j < i1->width; j += 16) {
-				v1 = _mm_load_si128((__m128i *) data1);
-				v2 = _mm_load_si128((__m128i *) data2);
-				res = _mm_adds_epu8(v1, v2);
-				_mm_store_si128((__m128i *) datao, res);
+		for (int j = 0; j < i1->width; j += 16) {
+			v1 = _mm_load_si128((__m128i *) data1);
+			v2 = _mm_load_si128((__m128i *) data2);
+			res = _mm_adds_epu8(v1, v2);
+			_mm_store_si128((__m128i *) datao, res);
 
-				datao += 16;
-				data1 += 16;
-				data2 += 16;
-			}
+			datao += 16;
+			data1 += 16;
+			data2 += 16;
 		}
 	}
 
@@ -53,6 +51,7 @@ private:
 	Image *i1;
 	Image *i2;
 	Image *o;
+	int c;
 };
 
 void add(int argc, char *argv[])
@@ -97,15 +96,16 @@ void add(int argc, char *argv[])
 		return;
 	}
 
-	AddParallel addParallel(input_image1, input_image2, output_image);
-
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	parallel_for(0, input_image1->height, addParallel);
+	for (int i = 0; i < input_image1->channels; ++i) {
+		AddParallel addParallel(input_image1, input_image2, output_image, i);
+		parallel_for(0, input_image1->height, addParallel);
+	}
 
 	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << endl;
+	cout << bench.elapsed_ticks << " ";
 	cout << bench.elapsed_time << endl;
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {

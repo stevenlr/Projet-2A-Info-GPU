@@ -22,8 +22,8 @@ using namespace tbb;
 class ThresholdParallel 
 {
 public:
-	ThresholdParallel(Image *output_image, uint8_t value) :
-		output_image(output_image), value(value)
+	ThresholdParallel(Image *output_image, uint8_t value, int channel) :
+		output_image(output_image), value(value), c(channel)
  	{ 
  		mask = _mm_setr_epi32(0x80808080, 0x80808080, 0x80808080, 0x80808080);
 		threshold = _mm_setr_epi8(
@@ -39,17 +39,15 @@ public:
 		uint8_t *data, *data_end;
 		__m128i src, dst;
 
-		for (int c = 0; c < output_image->channels; ++c) {
-			data = output_image->data[c] + i * output_image->width;
-			data_end = data + output_image->width;
+		data = output_image->data[c] + i * output_image->width;
+		data_end = data + output_image->width;
 
-			while (data < data_end) {
-				src = _mm_load_si128((__m128i *) data);
-				src = _mm_xor_si128(src, mask);
-				dst = _mm_cmpgt_epi8(src, threshold);
-				_mm_store_si128((__m128i *) data, dst);
-				data += 16;
-			}
+		while (data < data_end) {
+			src = _mm_load_si128((__m128i *) data);
+			src = _mm_xor_si128(src, mask);
+			dst = _mm_cmpgt_epi8(src, threshold);
+			_mm_store_si128((__m128i *) data, dst);
+			data += 16;
 		}
 	}
 
@@ -57,6 +55,7 @@ private:
 	Image *output_image;
 	uint8_t value;
 	__m128i mask, threshold;
+	int c;
 };
 
 void threshold(int argc, char *argv[])
@@ -94,13 +93,14 @@ void threshold(int argc, char *argv[])
 			memset(output_image->data[c], 0xff, size * sizeof(uint8_t));
 		}
 	} else {
-		ThresholdParallel thresholdParallel(output_image, value);
-
-		parallel_for(0, output_image->width, thresholdParallel);
+		for (int i = 0; i < output_image->channels; ++i) {
+			ThresholdParallel thresholdParallel(output_image, value, i);
+			parallel_for(0, output_image->width, thresholdParallel);
+		}
 	}
 
 	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << endl;
+	cout << bench.elapsed_ticks << " ";
 	cout << bench.elapsed_time << endl;
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
