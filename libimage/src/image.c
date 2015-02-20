@@ -7,16 +7,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "image/image.h"
 
 // Modified from http://stackoverflow.com/a/1920516
 static void *aligned_malloc(size_t size, size_t align)
 {
-	void *mem = malloc(size + align * 2 + sizeof(void*));
-	void **ptr = (void **)((uintptr_t)(mem + align + sizeof(void*)) & ~(align - 1));
+	uint8_t *mem = malloc(size + align * 2 + sizeof(uint8_t *));
+	uint8_t **ptr = (uint8_t **)((uintptr_t) (mem + align + sizeof(uint8_t *)) & ~(align - 1));
 	ptr[-1] = mem;
-	return ptr;
+	return (void *) ptr;
 }
 
 static void aligned_free(void *ptr)
