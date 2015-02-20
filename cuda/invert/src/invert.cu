@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
 
 	int c, size;
 	uint8_t *c_data;
-	int threadsPerBlock = 512;
-	int blocks = input_image->height / 512;
+	int threadsPerBlock = 32;
+	int blocks = input_image->height / threadsPerBlock;
 
 	size = input_image->width * input_image->height * sizeof(uint8_t);
 
