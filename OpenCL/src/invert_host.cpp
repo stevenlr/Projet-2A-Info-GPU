@@ -5,6 +5,7 @@
 #include <fstream>
 #include <cstdint>
 #include <cstring>
+#include <cmath>
 #include <CL/opencl.h>
 #include <image/image.h>
 #include <image/tga.h>
@@ -166,11 +167,12 @@ int main(int argc, char* argv[]) {
 		cout << "def" << endl;
 	assert(error == CL_SUCCESS);
 	cl_mem data, size_buffer, data2;
-	const size_t local_ws = 512;
+	const size_t local_ws = 256;
 	const size_t global_ws = shrRoundUp(local_ws, size);
 
 	uint8_t *dataImg;
 	uint8_t testInvertWorks = output_image->data[0][size-1];
+	cl_event eventNDRange;
 	cout << int(testInvertWorks) << endl;
 
 	for (int c = 0; c < input_image->channels; ++c) {
@@ -183,13 +185,13 @@ int main(int argc, char* argv[]) {
 
 		error = clSetKernelArg(invert_kernel, 0, sizeof(cl_mem), &data);
 		assert(error == CL_SUCCESS);
-		error |= clSetKernelArg(invert_kernel, 1, sizeof(cl_mem), &size_buffer);
+		error |= clSetKernelArg(invert_kernel, 1, sizeof(size_t), &size);
 		assert(error == CL_SUCCESS);
 		error |= clSetKernelArg(invert_kernel, 2, sizeof(cl_mem), &data2);
 		assert(error == CL_SUCCESS);
-		error = clEnqueueNDRangeKernel(queue, invert_kernel, 1, NULL, &global_ws, &local_ws, 0, NULL, NULL);
+		error = clEnqueueNDRangeKernel(queue, invert_kernel, 1, NULL, &global_ws, &local_ws, 0, NULL, &eventNDRange);
 		assert(error == CL_SUCCESS);
-		error = clEnqueueReadBuffer(queue, data2, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, NULL);
+		error = clEnqueueReadBuffer(queue, data2, CL_TRUE, 0, mem_size, output_image->data[c], 1, &eventNDRange, NULL);
 		assert(error == CL_SUCCESS);
 
 	}
