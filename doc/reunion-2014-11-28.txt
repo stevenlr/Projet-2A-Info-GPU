@@ -1,0 +1,7 @@
+Réunion 28 novembre 2014
+==========================
+
+ * Présentation des premiers benchmarks : utilisation de rdtsc.
+
+ * Implémenter les algorithmes avec vectorisation.
+ * Commencer installation des outils de développement GPU.

@@ -4,7 +4,7 @@ Réunion 25 novembre 2014
 Documentation/implémentation
 -------------------------------
  
- * se renseigner sur usertime / cputime
+ * Se renseigner sur usertime / cputime
  * Se concentrer sur cputime
 
 Benchmark

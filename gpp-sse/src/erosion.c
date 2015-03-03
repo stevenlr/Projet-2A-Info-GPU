@@ -92,7 +92,7 @@ void erosion(int argc, char *argv[])
 				tmpmin = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
 
 				for (yy = y1; yy <= y2; ++yy) {
-					src = _mm_loadu_si128((__m128i *) region);
+					src = _mm_loadu_si128((__m128i *) region); 
 					tmpmin = _mm_min_epu8(src, tmpmin);
 					region += line_offset;
 				}
