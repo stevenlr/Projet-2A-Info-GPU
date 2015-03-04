@@ -5,6 +5,8 @@
 #include <image/image.h>
 #include <image/tga.h>
 
+#include "../../CudaBench.h"
+
 __global__ void invert(uint8_t *data, int size, int partSize)
 {
 	int thread = blockDim.x * blockIdx.x + threadIdx.x;
@@ -13,7 +15,7 @@ __global__ void invert(uint8_t *data, int size, int partSize)
 	int i;
 
 	for (i = start; i < end; ++i) {
-		data[i] = 255 - data[i];
+		data[i] = data[i] ^ 0xff;
 	}
 }
 
@@ -49,13 +51,18 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	int partSizes[] = {4, 16, 64, 256, 1024};
+	int partSizes[] = {1, 4, 16, 64, 256, 1024};
 	int threadsPerBlocks[] = {32, 96, 192, 384};
 
 	int partSizeIndex = 0;
 	int threadsPerBlockIndex = 0;
 
-	for (partSizeIndex = 0; partSizeIndex < 5; ++partSizeIndex) {
+	CudaBench allBench, channelBench, kernelBench;
+	allBench = CudaBench_new();
+	channelBench = CudaBench_new();
+	kernelBench = CudaBench_new();
+
+	for (partSizeIndex = 0; partSizeIndex < 6; ++partSizeIndex) {
 		for (threadsPerBlockIndex = 0; threadsPerBlockIndex < 4; ++threadsPerBlockIndex) {
 			int c, size;
 			uint8_t *c_data;
@@ -67,46 +74,29 @@ int main(int argc, char *argv[])
 
 			size = input_image->width * input_image->height * sizeof(uint8_t);
 
-			cudaEvent_t startAll, startChannel, startKernel;
-			cudaEvent_t stopAll, stopChannel, stopKernel;
-
-			cudaEventCreate(&startAll);
-			cudaEventCreate(&startChannel);
-			cudaEventCreate(&startKernel);
-			cudaEventCreate(&stopAll);
-			cudaEventCreate(&stopChannel);
-			cudaEventCreate(&stopKernel);
-
-			cudaEventRecord(startAll);
+			CudaBench_start(allBench);
 			cudaMalloc(&c_data, size);
 
 			for (c = 0; c < input_image->channels; ++c) {
-				cudaEventRecord(startChannel);
+				CudaBench_start(channelBench);
 				cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
-				cudaEventRecord(startKernel);
+				CudaBench_start(kernelBench);
 				invert<<<blocks, threadsPerBlock>>>(c_data, input_image->width * input_image->height, partSize);
-				cudaEventRecord(stopKernel);
+				CudaBench_end(kernelBench);
 				cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
-				cudaEventRecord(stopChannel);
+				CudaBench_end(channelBench);
 			}
 
 			cudaFree(c_data);
-			cudaEventRecord(stopAll);
+			CudaBench_end(allBench);
 
-			cudaEventSynchronize(stopAll);
+			cudaEventSynchronize(allBench.end);
 
 			float timeAll, timeChannel, timeKernel;
 
-			cudaEventElapsedTime(&timeAll, startAll, stopAll);
-			cudaEventElapsedTime(&timeChannel, startChannel, stopChannel);
-			cudaEventElapsedTime(&timeKernel, startKernel, stopKernel);
-
-			cudaEventDestroy(startAll);
-			cudaEventDestroy(startChannel);
-			cudaEventDestroy(startKernel);
-			cudaEventDestroy(stopAll);
-			cudaEventDestroy(stopChannel);
-			cudaEventDestroy(stopKernel);
+			timeAll = CudaBench_elapsedTime(allBench);
+			timeChannel = CudaBench_elapsedTime(channelBench);
+			timeKernel = CudaBench_elapsedTime(kernelBench);
 
 			//printf("All: %fms\nChannel: %fms\nKernel: %fms\n", timeAll, timeChannel, timeKernel);
 			printf("%f\n\n", timeKernel);
@@ -124,50 +114,37 @@ int main(int argc, char *argv[])
 
 		size = input_image->width * input_image->height * sizeof(uint8_t);
 
-		cudaEvent_t startAll, startChannel, startKernel;
-		cudaEvent_t stopAll, stopChannel, stopKernel;
-
-		cudaEventCreate(&startAll);
-		cudaEventCreate(&startChannel);
-		cudaEventCreate(&startKernel);
-		cudaEventCreate(&stopAll);
-		cudaEventCreate(&stopChannel);
-		cudaEventCreate(&stopKernel);
-
-		cudaEventRecord(startAll);
+		CudaBench_start(allBench);
 		cudaMalloc(&c_data, size);
 
 		for (c = 0; c < input_image->channels; ++c) {
-			cudaEventRecord(startChannel);
+			CudaBench_start(channelBench);
 			cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
-			cudaEventRecord(startKernel);
+			CudaBench_start(kernelBench);
 			invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, input_image->width * input_image->height);
-			cudaEventRecord(stopKernel);
+			CudaBench_end(kernelBench);
 			cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
-			cudaEventRecord(stopChannel);
+			CudaBench_end(channelBench);
 		}
 
 		cudaFree(c_data);
-		cudaEventRecord(stopAll);
+		CudaBench_end(allBench);
 
-		cudaEventSynchronize(stopAll);
+		cudaEventSynchronize(allBench.end);
 
 		float timeAll, timeChannel, timeKernel;
 
-		cudaEventElapsedTime(&timeAll, startAll, stopAll);
-		cudaEventElapsedTime(&timeChannel, startChannel, stopChannel);
-		cudaEventElapsedTime(&timeKernel, startKernel, stopKernel);
+		timeAll = CudaBench_elapsedTime(allBench);
+		timeChannel = CudaBench_elapsedTime(channelBench);
+		timeKernel = CudaBench_elapsedTime(kernelBench);
 
-		cudaEventDestroy(startAll);
-		cudaEventDestroy(startChannel);
-		cudaEventDestroy(startKernel);
-		cudaEventDestroy(stopAll);
-		cudaEventDestroy(stopChannel);
-		cudaEventDestroy(stopKernel);
-
-		printf("All: %fms\nChannel: %fms\nKernel: %fms\n", timeAll, timeChannel, timeKernel);
+		//printf("All: %fms\nChannel: %fms\nKernel: %fms\n", timeAll, timeChannel, timeKernel);
 		printf("%f\n\n", timeKernel);
 	}
+
+	CubaBench_delete(allBench);
+	CubaBench_delete(channelBench);
+	CubaBench_delete(kernelBench);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
