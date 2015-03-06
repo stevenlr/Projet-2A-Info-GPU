@@ -26,3 +26,6 @@ cleanall: clean
 
 output-images:
 	$(MKDIR) -p ../output-images
+
+output-profiling:
+	$(MKDIR) -p ../output-profiling

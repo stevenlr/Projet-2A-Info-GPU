@@ -45,3 +45,6 @@ run_tests_tbb:
 
 run_tests_cuda:
 	cd tests && $(MAKE) run_cuda
+
+run_profile_cuda:
+	cd cuda && $(MAKE) profile
