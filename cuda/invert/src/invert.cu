@@ -96,5 +96,7 @@ int main(int argc, char *argv[])
 	Image_delete(input_image);
 	Image_delete(output_image);
 
+	cudaDeviceReset();
+
 	return 0;
 }
