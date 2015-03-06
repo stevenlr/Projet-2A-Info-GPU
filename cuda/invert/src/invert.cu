@@ -7,24 +7,11 @@
 
 #include "../../CudaBench.h"
 
-__global__ void invert(uint8_t *data, int size, int partSize)
-{
-	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	int start = thread * partSize;
-	int end = min(start + partSize, size);
-	int i;
-
-	for (i = start; i < end; ++i) {
-		data[i] = data[i] ^ 0xff;
-	}
-}
-
 __constant__ __device__ unsigned int full = 0xffffffff;
 
-__global__ void invertSIMD(unsigned int *data, int size)
+__global__ void invert(unsigned int *data, int size)
 {
-	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	unsigned int *ptr = data + thread;
+	unsigned int *ptr = data + blockDim.x * blockIdx.x + threadIdx.x;
 
 	*ptr = __vsubss4(full, *ptr);
 }
@@ -51,99 +38,55 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	int partSizes[] = {1, 4, 16, 64, 256, 1024};
-	int threadsPerBlocks[] = {32, 96, 192, 384};
-
-	int partSizeIndex = 0;
-	int threadsPerBlockIndex = 0;
-
-	CudaBench allBench, channelBench, kernelBench;
+	CudaBench allBench, sendBench, retrieveBench, kernelBench;
 	allBench = CudaBench_new();
-	channelBench = CudaBench_new();
+	sendBench = CudaBench_new();
+	retrieveBench = CudaBench_new();
 	kernelBench = CudaBench_new();
 
-	for (partSizeIndex = 0; partSizeIndex < 6; ++partSizeIndex) {
-		for (threadsPerBlockIndex = 0; threadsPerBlockIndex < 4; ++threadsPerBlockIndex) {
-			int c, size;
-			uint8_t *c_data;
-			int partSize = partSizes[partSizeIndex];
-			int threadsPerBlock = threadsPerBlocks[threadsPerBlockIndex];
-			int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
+	int c, size, sizeDevice;
+	uint8_t *c_data;
+	int partSize = 4;
+	int threadsPerBlock = 512;
+	int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
 
-			printf("%d %d\n", partSize, threadsPerBlock);
+	size = input_image->width * input_image->height * sizeof(uint8_t);
+	sizeDevice = size + 4 - (size % 4);
 
-			size = input_image->width * input_image->height * sizeof(uint8_t);
+	CudaBench_start(allBench);
+	cudaMalloc(&c_data, sizeDevice);
 
-			CudaBench_start(allBench);
-			cudaMalloc(&c_data, size);
+	for (c = 0; c < input_image->channels; ++c) {
+		CudaBench_start(sendBench);
+		cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
+		CudaBench_end(sendBench);
 
-			for (c = 0; c < input_image->channels; ++c) {
-				CudaBench_start(channelBench);
-				cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
-				CudaBench_start(kernelBench);
-				invert<<<blocks, threadsPerBlock>>>(c_data, input_image->width * input_image->height, partSize);
-				CudaBench_end(kernelBench);
-				cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
-				CudaBench_end(channelBench);
-			}
+		CudaBench_start(kernelBench);
+		invert<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, input_image->width * input_image->height);
+		CudaBench_end(kernelBench);
 
-			cudaFree(c_data);
-			CudaBench_end(allBench);
-
-			cudaEventSynchronize(allBench.end);
-
-			float timeAll, timeChannel, timeKernel;
-
-			timeAll = CudaBench_elapsedTime(allBench);
-			timeChannel = CudaBench_elapsedTime(channelBench);
-			timeKernel = CudaBench_elapsedTime(kernelBench);
-
-			//printf("All: %fms\nChannel: %fms\nKernel: %fms\n", timeAll, timeChannel, timeKernel);
-			printf("%f\n\n", timeKernel);
-		}
+		CudaBench_start(retrieveBench);
+		cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
+		CudaBench_end(retrieveBench);
 	}
 
-	for (threadsPerBlockIndex = 0; threadsPerBlockIndex < 4; ++threadsPerBlockIndex) {
-		int c, size;
-		uint8_t *c_data;
-		int partSize = 4;
-		int threadsPerBlock = threadsPerBlocks[threadsPerBlockIndex];
-		int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
+	cudaFree(c_data);
+	CudaBench_end(allBench);
 
-		printf("%d %d\n", partSize, threadsPerBlock);
+	cudaEventSynchronize(allBench.end);
 
-		size = input_image->width * input_image->height * sizeof(uint8_t);
+	float timeAll, timeSend, timeKernel, timeRetrieve;
 
-		CudaBench_start(allBench);
-		cudaMalloc(&c_data, size);
+	timeAll = CudaBench_elapsedTime(allBench);
+	timeSend = CudaBench_elapsedTime(sendBench);
+	timeRetrieve = CudaBench_elapsedTime(retrieveBench);
+	timeKernel = CudaBench_elapsedTime(kernelBench);
 
-		for (c = 0; c < input_image->channels; ++c) {
-			CudaBench_start(channelBench);
-			cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
-			CudaBench_start(kernelBench);
-			invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, input_image->width * input_image->height);
-			CudaBench_end(kernelBench);
-			cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
-			CudaBench_end(channelBench);
-		}
-
-		cudaFree(c_data);
-		CudaBench_end(allBench);
-
-		cudaEventSynchronize(allBench.end);
-
-		float timeAll, timeChannel, timeKernel;
-
-		timeAll = CudaBench_elapsedTime(allBench);
-		timeChannel = CudaBench_elapsedTime(channelBench);
-		timeKernel = CudaBench_elapsedTime(kernelBench);
-
-		//printf("All: %fms\nChannel: %fms\nKernel: %fms\n", timeAll, timeChannel, timeKernel);
-		printf("%f\n\n", timeKernel);
-	}
+	printf("All: %f ms\nSend: %f ms\nRetrieve: %f ms\nKernel: %f ms\n", timeAll, timeSend, timeRetrieve, timeKernel);
 
 	CubaBench_delete(allBench);
-	CubaBench_delete(channelBench);
+	CubaBench_delete(sendBench);
+	CubaBench_delete(retrieveBench);
 	CubaBench_delete(kernelBench);
 
 	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
