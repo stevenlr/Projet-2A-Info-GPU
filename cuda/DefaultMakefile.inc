@@ -7,6 +7,7 @@ SRC=$(wildcard src/*.cu)
 BASENAME=$(patsubst src/%.c, %, $(SRC))
 RM=rm
 MKDIR=mkdir
+NVPROFFLAGS=--print-gpu-trace
 
 .PHONY: all clean cleanall run
 
