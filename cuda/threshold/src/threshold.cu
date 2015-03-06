@@ -7,30 +7,33 @@
 
 #include "../../CudaBench.h"
 
-__global__ void invert(uint8_t *data, int size, int partSize)
+__constant__ __device__ unsigned int full = 0xffffffff;
+
+__global__ void threshold(uint8_t *data, uint8_t threshold, int size, int partSize)
 {
 	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	int start = thread * partSize;
-	int end = min(start + partSize, size);
-	int i;
+	uint8_t *ptr = data + thread * partSize;
+	uint8_t *end = data + min(size, thread * partSize + partSize);
 
-	for (i = start; i < end; ++i) {
-		data[i] = 255 - data[i];
+	for (; ptr < end; ++ptr) {
+		if (*ptr < threshold) {
+			*ptr = 0;
+		} else {
+			*ptr = 255;
+		}
 	}
 }
 
-__constant__ __device__ unsigned int full = 0xffffffff;
-
-__global__ void invertSIMD(unsigned int *data, int size)
+__global__ void thresholdSIMD(unsigned int *data, unsigned int threshold, int size)
 {
 	unsigned int *ptr = data + blockDim.x * blockIdx.x + threadIdx.x;
 
-	*ptr = __vsubss4(full, *ptr);
+	*ptr = __vcmpgeu4(*ptr, threshold);
 }
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("Invalid number of arguments.\n");
 		return 1;
 	}
@@ -44,6 +47,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	uint8_t thresholdValue = atoi(argv[2]);
+	unsigned int thresholdValue32 = thresholdValue | (thresholdValue << 8) | (thresholdValue << 16) | (thresholdValue << 24);
+
 	if ((error = Image_copy(input_image, &output_image)) != 0) {
 		printf("Error when copying image: %d\n", error);
 		Image_delete(input_image);
@@ -56,17 +62,16 @@ int main(int argc, char *argv[])
 	retrieveBench = CudaBench_new();
 	kernelBench = CudaBench_new();
 
-	int c, size, sizeDevice;
+	int c, size;
 	uint8_t *c_data;
 	int partSize = 4;
 	int threadsPerBlock = 512;
 	int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
 
 	size = input_image->width * input_image->height * sizeof(uint8_t);
-	sizeDevice = size + 4 - (size % 4);
 
 	CudaBench_start(allBench);
-	cudaMalloc(&c_data, sizeDevice);
+	cudaMalloc(&c_data, size);
 
 	for (c = 0; c < input_image->channels; ++c) {
 		CudaBench_start(sendBench);
@@ -74,7 +79,7 @@ int main(int argc, char *argv[])
 		CudaBench_end(sendBench);
 
 		CudaBench_start(kernelBench);
-		invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, input_image->width * input_image->height);
+		thresholdSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, thresholdValue32, size);
 		CudaBench_end(kernelBench);
 
 		CudaBench_start(retrieveBench);
@@ -101,7 +106,7 @@ int main(int argc, char *argv[])
 	CubaBench_delete(retrieveBench);
 	CubaBench_delete(kernelBench);
 
-	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
+	if ((error = TGA_writeImage(argv[3], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
 	}
 
