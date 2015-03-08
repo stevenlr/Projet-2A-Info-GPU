@@ -7,26 +7,28 @@
 
 #include "../../CudaBench.h"
 
-__constant__ __device__ unsigned int full = 0xffffffff;
+#define PARTSIZE 4
 
-__global__ void threshold(uint8_t *data, uint8_t threshold, int size, int partSize)
+__global__ void threshold(uint8_t *data, uint8_t threshold)
 {
-	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	uint8_t *ptr = data + thread * partSize;
-	uint8_t *end = data + min(size, thread * partSize + partSize);
+	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
+	uint8_t *ptr = data + thread * PARTSIZE;
 
-	for (; ptr < end; ++ptr) {
-		if (*ptr < threshold) {
-			*ptr = 0;
+	for (int i = 0; i < PARTSIZE; ++i) {
+		if (ptr[i] < threshold) {
+			ptr[i] = 0;
 		} else {
-			*ptr = 255;
+			ptr[i] = 255;
 		}
 	}
 }
 
-__global__ void thresholdSIMD(unsigned int *data, unsigned int threshold, int size)
+__constant__ __device__ unsigned int full = 0xffffffff;
+
+__global__ void thresholdSIMD(unsigned int *data, unsigned int threshold)
 {
-	unsigned int *ptr = data + blockDim.x * blockIdx.x + threadIdx.x;
+	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
+	unsigned int *ptr = data + thread;
 
 	*ptr = __vcmpgeu4(*ptr, threshold);
 }
@@ -62,13 +64,11 @@ int main(int argc, char *argv[])
 	retrieveBench = CudaBench_new();
 	kernelBench = CudaBench_new();
 
-	int c, size;
+	int c, size = input_image->width * input_image->height * sizeof(uint8_t);
 	uint8_t *c_data;
-	int partSize = 4;
-	int threadsPerBlock = 512;
-	int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
 
-	size = input_image->width * input_image->height * sizeof(uint8_t);
+	int threadsPerBlock = 128;
+	dim3 blocks(input_image->width / 32, input_image->height / 16, 1);
 
 	CudaBench_start(allBench);
 	cudaMalloc(&c_data, size);
@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
 		CudaBench_end(sendBench);
 
 		CudaBench_start(kernelBench);
-		thresholdSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, thresholdValue32, size);
+		//threshold<<<blocks, threadsPerBlock>>>(c_data, thresholdValue);
+		thresholdSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, thresholdValue32);
 		CudaBench_end(kernelBench);
 
 		CudaBench_start(retrieveBench);
