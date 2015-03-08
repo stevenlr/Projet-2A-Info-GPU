@@ -1,4 +1,4 @@
-TARGETS=invert threshold
+TARGETS=invert threshold add
 
 all:
 	for t in $(TARGETS); do cd $$t && $(MAKE) && cd ..; done

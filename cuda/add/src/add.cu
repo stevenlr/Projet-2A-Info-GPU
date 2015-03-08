@@ -9,57 +9,79 @@
 
 #define PARTSIZE 4
 
-__global__ void invert(uint8_t *data)
+__global__ void add(uint8_t *data1, uint8_t *data2)
 {
 	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
-	uint8_t *ptr = data + thread * PARTSIZE;
-	uint8_t values[PARTSIZE];
+	uint8_t *ptr1 = data1 + thread * PARTSIZE;
+	uint8_t *ptr2 = data2 + thread * PARTSIZE;
+	uint16_t value[2 * PARTSIZE];
 
 #pragma unroll PARTSIZE
 	for (int i = 0; i < PARTSIZE; ++i) {
-		values[i] = ptr[i];
+		value[i] = ptr1[i];
+		value[PARTSIZE + i] = ptr2[i];
 	}
 
 #pragma unroll PARTSIZE
 	for (int i = 0; i < PARTSIZE; ++i) {
-		values[i] = 255 - values[i];
+		value[i] += value[PARTSIZE + i];
 	}
 
 #pragma unroll PARTSIZE
 	for (int i = 0; i < PARTSIZE; ++i) {
-		ptr[i] = values[i];
+		value[i] = min(value[i], 255);
+	}
+
+#pragma unroll PARTSIZE
+	for (int i = 0; i < PARTSIZE; ++i) {
+		ptr1[i] = value[i];
 	}
 }
 
-__constant__ __device__ unsigned int full = 0xffffffff;
-
-__global__ void invertSIMD(unsigned int *data)
+__global__ void addSIMD(unsigned int *data1, unsigned int *data2)
 {
 	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
-	unsigned int *ptr = data + thread;
+	unsigned int *ptr1 = data1 + thread;
+	unsigned int *ptr2 = data2 + thread;
 
-	*ptr = __vsubss4(full, *ptr);
+	*ptr1 = __vaddus4(*ptr1, *ptr2);
 }
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3) {
+	if (argc != 4) {
 		printf("Invalid number of arguments.\n");
 		return 1;
 	}
 
-	Image *input_image;
+	Image *input_image1;
+	Image *input_image2;
 	Image *output_image;
 	int error;
 
-	if ((error = TGA_readImage(argv[1], &input_image)) != 0) {
+	if ((error = TGA_readImage(argv[1], &input_image1)) != 0) {
 		printf("Error when opening image: %d\n", error);
 		return 1;
 	}
 
-	if ((error = Image_copy(input_image, &output_image)) != 0) {
+	if ((error = TGA_readImage(argv[2], &input_image2)) != 0) {
+		printf("Error when opening image: %d\n", error);
+		return 1;
+	}
+
+	if (input_image1->width != input_image2->width
+		|| input_image1->height != input_image2->height
+		|| input_image1->channels != input_image2->channels) {
+		printf("Input images dimensions differ\n");
+		Image_delete(input_image1);
+		Image_delete(input_image2);
+		return 1;
+	}
+
+	if ((error = Image_copy(input_image1, &output_image)) != 0) {
 		printf("Error when copying image: %d\n", error);
-		Image_delete(input_image);
+		Image_delete(input_image1);
+		Image_delete(input_image2);
 		return 1;
 	}
 
@@ -70,12 +92,12 @@ int main(int argc, char *argv[])
 	kernelBench = CudaBench_new();
 
 	int c, size, sizeDevice, sizePadding;
-	uint8_t *c_data;
+	uint8_t *c_data1, *c_data2;
 	
-	size = input_image->width * input_image->height * sizeof(uint8_t);
+	size = input_image1->width * input_image1->height * sizeof(uint8_t);
 
-	int threadsPerBlock = 512;
-	dim3 blocks(input_image->width / 64, input_image->height / 32, 1);
+	int threadsPerBlock = 256;
+	dim3 blocks(input_image1->width / 32, input_image1->height / 32, 1);
 
 	sizePadding = threadsPerBlock * PARTSIZE;
 	
@@ -85,24 +107,27 @@ int main(int argc, char *argv[])
 		sizeDevice = size + sizePadding - (size % sizePadding);
 
 	CudaBench_start(allBench);
-	cudaMalloc(&c_data, sizeDevice);
+	cudaMalloc(&c_data1, sizeDevice);
+	cudaMalloc(&c_data2, sizeDevice);
 
-	for (c = 0; c < input_image->channels; ++c) {
+	for (c = 0; c < input_image1->channels; ++c) {
 		CudaBench_start(sendBench);
-		cudaMemcpy(c_data, input_image->data[c], size, cudaMemcpyHostToDevice);
+		cudaMemcpy(c_data1, input_image1->data[c], size, cudaMemcpyHostToDevice);
+		cudaMemcpy(c_data2, input_image2->data[c], size, cudaMemcpyHostToDevice);
 		CudaBench_end(sendBench);
 
 		CudaBench_start(kernelBench);
-		//invert<<<blocks, threadsPerBlock>>>(c_data);
-		invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data);
+		//add<<<blocks, threadsPerBlock>>>(c_data1, c_data2);
+		addSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data1, (unsigned int *) c_data2);
 		CudaBench_end(kernelBench);
 
 		CudaBench_start(retrieveBench);
-		cudaMemcpy(output_image->data[c], c_data, size, cudaMemcpyDeviceToHost);
+		cudaMemcpy(output_image->data[c], c_data1, size, cudaMemcpyDeviceToHost);
 		CudaBench_end(retrieveBench);
 	}
 
-	cudaFree(c_data);
+	cudaFree(c_data1);
+	cudaFree(c_data2);
 	CudaBench_end(allBench);
 
 	cudaEventSynchronize(allBench.end);
@@ -121,11 +146,12 @@ int main(int argc, char *argv[])
 	CubaBench_delete(retrieveBench);
 	CubaBench_delete(kernelBench);
 
-	if ((error = TGA_writeImage(argv[2], output_image)) != 0) {
+	if ((error = TGA_writeImage(argv[3], output_image)) != 0) {
 		printf("Error when writing image: %d\n", error);
 	}
 
-	Image_delete(input_image);
+	Image_delete(input_image1);
+	Image_delete(input_image2);
 	Image_delete(output_image);
 
 	cudaDeviceReset();
