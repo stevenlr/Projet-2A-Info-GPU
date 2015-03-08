@@ -11,21 +11,32 @@
 
 __global__ void invert(uint8_t *data, int size)
 {
-	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	int start = thread * PARTSIZE;
-	int end = min(start + PARTSIZE, size);
-	int i;
+	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
+	uint8_t *ptr = data + thread * PARTSIZE;
+	uint8_t values[PARTSIZE];
 
-	for (i = start; i < end; ++i) {
-		data[i] = 255 - data[i];
+#pragma unroll PARTSIZE
+	for (int i = 0; i < PARTSIZE; ++i) {
+		values[i] = ptr[i];
+	}
+
+#pragma unroll PARTSIZE
+	for (int i = 0; i < PARTSIZE; ++i) {
+		values[i] = 255 - values[i];
+	}
+
+#pragma unroll PARTSIZE
+	for (int i = 0; i < PARTSIZE; ++i) {
+		ptr[i] = values[i];
 	}
 }
 
 __constant__ __device__ unsigned int full = 0xffffffff;
 
-__global__ void invertSIMD(unsigned int *data, int size)
+__global__ void invertSIMD(unsigned int *data)
 {
-	unsigned int *ptr = data + blockDim.x * blockIdx.x + threadIdx.x;
+	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
+	unsigned int *ptr = data + thread;
 
 	*ptr = __vsubss4(full, *ptr);
 }
@@ -58,14 +69,20 @@ int main(int argc, char *argv[])
 	retrieveBench = CudaBench_new();
 	kernelBench = CudaBench_new();
 
-	int c, size, sizeDevice;
+	int c, size, sizeDevice, sizePadding;
 	uint8_t *c_data;
 	
-	int threadsPerBlock = 128;
-	dim3 blocks(input_image->width / 32, input_image->height / 16, 1);
-
 	size = input_image->width * input_image->height * sizeof(uint8_t);
-	sizeDevice = size + 4 - (size % 4);
+
+	int threadsPerBlock = 512;
+	dim3 blocks(input_image->width / 64, input_image->height / 32, 1);
+
+	sizePadding = threadsPerBlock * PARTSIZE;
+	
+	if (size % sizePadding == 0)
+		sizeDevice = size;
+	else
+		sizeDevice = size + sizePadding - (size % sizePadding);
 
 	CudaBench_start(allBench);
 	cudaMalloc(&c_data, sizeDevice);
@@ -76,7 +93,8 @@ int main(int argc, char *argv[])
 		CudaBench_end(sendBench);
 
 		CudaBench_start(kernelBench);
-		invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data, input_image->width * input_image->height);
+		//invert<<<blocks, threadsPerBlock>>>(c_data, input_image->width * input_image->height);
+		invertSIMD<<<blocks, threadsPerBlock>>>((unsigned int *) c_data);
 		CudaBench_end(kernelBench);
 
 		CudaBench_start(retrieveBench);

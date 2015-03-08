@@ -66,9 +66,10 @@ int main(int argc, char *argv[])
 	uint8_t *c_data;
 	int sizeDevice, sizePadding;
 
-	int threadsPerBlock = 128; // 16 * 8
-	sizePadding = threadsPerBlock * PARTSIZE;
+	int threadsPerBlock = 128;
 	dim3 blocks(input_image->width / 32, input_image->height / 16, 1);
+
+	sizePadding = threadsPerBlock * PARTSIZE;
 
 	if (size % sizePadding == 0)
 		sizeDevice = size;
