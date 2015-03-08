@@ -7,11 +7,13 @@
 
 #include "../../CudaBench.h"
 
-__global__ void invert(uint8_t *data, int size, int partSize)
+#define PARTSIZE 4
+
+__global__ void invert(uint8_t *data, int size)
 {
 	int thread = blockDim.x * blockIdx.x + threadIdx.x;
-	int start = thread * partSize;
-	int end = min(start + partSize, size);
+	int start = thread * PARTSIZE;
+	int end = min(start + PARTSIZE, size);
 	int i;
 
 	for (i = start; i < end; ++i) {
@@ -58,9 +60,9 @@ int main(int argc, char *argv[])
 
 	int c, size, sizeDevice;
 	uint8_t *c_data;
-	int partSize = 4;
-	int threadsPerBlock = 512;
-	int blocks = input_image->width * input_image->height / threadsPerBlock / partSize;
+	
+	int threadsPerBlock = 128;
+	dim3 blocks(input_image->width / 32, input_image->height / 16, 1);
 
 	size = input_image->width * input_image->height * sizeof(uint8_t);
 	sizeDevice = size + 4 - (size % 4);

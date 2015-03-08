@@ -23,8 +23,6 @@ __global__ void threshold(uint8_t *data, uint8_t threshold)
 	}
 }
 
-__constant__ __device__ unsigned int full = 0xffffffff;
-
 __global__ void thresholdSIMD(unsigned int *data, unsigned int threshold)
 {
 	int thread = (gridDim.x * blockIdx.y + blockIdx.x) * blockDim.x + threadIdx.x;
@@ -66,12 +64,19 @@ int main(int argc, char *argv[])
 
 	int c, size = input_image->width * input_image->height * sizeof(uint8_t);
 	uint8_t *c_data;
+	int sizeDevice, sizePadding;
 
-	int threadsPerBlock = 128;
+	int threadsPerBlock = 128; // 16 * 8
+	sizePadding = threadsPerBlock * PARTSIZE;
 	dim3 blocks(input_image->width / 32, input_image->height / 16, 1);
 
+	if (size % sizePadding == 0)
+		sizeDevice = size;
+	else
+		sizeDevice = size + sizePadding - (size % sizePadding);
+
 	CudaBench_start(allBench);
-	cudaMalloc(&c_data, size);
+	cudaMalloc(&c_data, sizeDevice);
 
 	for (c = 0; c < input_image->channels; ++c) {
 		CudaBench_start(sendBench);
