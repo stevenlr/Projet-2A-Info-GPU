@@ -8,3 +8,9 @@ run:
 
 profile:
 	for t in $(TARGETS); do cd $$t && $(MAKE) profile && cd ..; done
+
+clean:
+	for t in $(TARGETS); do cd $$t && $(MAKE) clean && cd ..; done
+
+cleanall:
+	for t in $(TARGETS); do cd $$t && $(MAKE) cleanall && cd ..; done
