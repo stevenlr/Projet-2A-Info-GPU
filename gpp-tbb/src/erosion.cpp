@@ -53,7 +53,7 @@ public:
 			int xx, yy;
 			
 			for (xx = x1; xx <= x2; xx += 16) {
-				uint8_t *region = in_data + Image_getOffset(input_image, x1, y1);
+				uint8_t *region = in_data + Image_getOffset(input_image, xx, y1);
 
 				tmpmin = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
 
