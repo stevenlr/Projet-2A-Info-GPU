@@ -162,11 +162,12 @@ int main(int argc, char *argv[])
 		CudaBench_end(sendBench);
 
 		CudaBench_start(kernelBench);
-		erosion2<<<blocks, threadsPerBlock>>>(c_inData, c_outData, rx, ry, input_image->width, input_image->height);
+		erosion<<<blocks, threadsPerBlock>>>(c_inData, c_outData, rx, 0, input_image->width, input_image->height);
+		erosion<<<blocks, threadsPerBlock>>>(c_outData, c_inData, 0, ry, input_image->width, input_image->height);
 		CudaBench_end(kernelBench);
 
 		CudaBench_start(retrieveBench);
-		cudaMemcpy(output_image->data[c], c_outData, size, cudaMemcpyDeviceToHost);
+		cudaMemcpy(output_image->data[c], c_inData, size, cudaMemcpyDeviceToHost);
 		CudaBench_end(retrieveBench);
 	}
 
