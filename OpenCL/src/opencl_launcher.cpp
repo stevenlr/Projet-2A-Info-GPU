@@ -66,7 +66,7 @@ cl_command_queue Opencl_launcher::getQueue(){
 	return queue;
 }
 
-void Opencl_launcher::benchmark(cl_event event){
+void Opencl_launcher::benchmark(cl_event event, string name){
 	cl_ulong time_start, time_end;
 	double total_time;
 
@@ -74,7 +74,7 @@ void Opencl_launcher::benchmark(cl_event event){
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	
 	total_time = time_end - time_start;
-	cout << "Execution time in seconds = " << (total_time / 1000000000.0) << "s" << endl;
+	cout << name << " in seconds = " << (total_time / 1000000.0) << "ms" << endl;
 }
 
 cl_kernel Opencl_launcher::load_kernel(string file, string name){
@@ -124,7 +124,7 @@ cl_kernel Opencl_launcher::load_kernel(string file, string name){
 			cout << "op" << endl;
 			break;
 		default:
-			cout << "SUCCESS PROGRAM BUILD" << endl;
+			cout << "";//cout << "SUCCESS PROGRAM BUILD" << endl;
 	}
 
 	kernel = clCreateKernel(program, name.c_str(), &error);

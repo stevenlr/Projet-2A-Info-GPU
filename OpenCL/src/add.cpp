@@ -10,7 +10,6 @@
 #include <image/image.h>
 #include <image/tga.h>
 
-#include "benchmark.h"
 #include "main.h"
 #include "opencl_launcher.h"
 
@@ -54,13 +53,11 @@ int add(int argc, char* argv[]) {
 	int size = input_image1->height * input_image1->width;
 	const int mem_size = sizeof(uint8_t) * size;
 	cl_mem data1, data2;
-	const size_t local_ws = 256;
+
+	const size_t local_ws = 128;
 	const size_t global_ws = shrRoundUp(local_ws, size);
 
 	cl_event event;
-
-	Benchmark bench;
-	start_benchmark(&bench);
 
 	for (int c = 0; c < input_image1->channels; ++c) {
 		data1 = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, output_image->data[c], &error);
@@ -77,15 +74,13 @@ int add(int argc, char* argv[]) {
 		assert(error == CL_SUCCESS);
 		clWaitForEvents(1 , &event);
 
-		ocl.benchmark(event);
+		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, output_image->data[c], 1, &event, NULL);
+		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, output_image->data[c], 1, &event, &event);
+
+		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
 	}
-
-	end_benchmark(&bench);
-	cout << bench.elapsed_ticks << " ";
-	cout << bench.elapsed_time << endl;
 
 	if ((errortga = TGA_writeImage(argv[2], output_image)) != 0) {
 		cout << "Error when writing image: " << errortga << endl;
