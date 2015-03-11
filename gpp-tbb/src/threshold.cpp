@@ -25,6 +25,8 @@ public:
 	ThresholdParallel(Image *output_image, uint8_t value, int channel) :
 		output_image(output_image), value(value), c(channel)
  	{ 
+ 		value -= 1;
+ 		value ^= 0x80;
  		mask = _mm_setr_epi32(0x80808080, 0x80808080, 0x80808080, 0x80808080);
 		threshold = _mm_setr_epi8(
 			value, value, value, value,
@@ -86,7 +88,7 @@ void threshold(int argc, char *argv[])
 	Benchmark bench;
 	start_benchmark(&bench);
 
-	if (value == 0) {
+	if (value == 0x00) {
 		int size = input_image->width * input_image->height;
 		
 		for (int c = 0; c < input_image->channels; ++c) {
