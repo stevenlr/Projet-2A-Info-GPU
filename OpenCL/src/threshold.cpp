@@ -43,21 +43,25 @@ int threshold(int argc, char* argv[]) {
 	cl_context context = ocl.getContext();
 	cl_command_queue queue = ocl.getQueue();
 
-	int size = input_image->height * input_image->width;
-	const int mem_size = sizeof(uint8_t) * size;
+	int size = input_image->height * input_image->width / 16;
+	const int mem_size = sizeof(cl_uchar16) * size;
 	cl_mem data;
 	const size_t local_ws = 256;
 	const size_t global_ws = shrRoundUp(local_ws, size);
-
+	cl_uchar16* dataInput; 
 	cl_event event;
 
+	cl_float valueF = static_cast<float>(value);
+	cl_float16 valueF16 = {valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF};
+
 	for (int c = 0; c < input_image->channels; ++c) {
+		dataInput =  (cl_uchar16*) output_image->data[c];
 		data = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, output_image->data[c], &error);
 		assert(error == CL_SUCCESS);
 
 		error = clSetKernelArg(threshold_kernel, 0, sizeof(cl_mem), &data);
 		error |= clSetKernelArg(threshold_kernel, 1, sizeof(size_t), &size);
-		error |= clSetKernelArg(threshold_kernel, 2, sizeof(uint8_t), &value);
+		error |= clSetKernelArg(threshold_kernel, 2, sizeof(cl_float16), &valueF16);
 		assert(error == CL_SUCCESS);
 
 		clFinish(queue);
@@ -71,6 +75,8 @@ int threshold(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
+
+		output_image->data[c] = (uint8_t*) dataInput;
 	}
 
 	if ((errortga = TGA_writeImage(argv[2], output_image)) != 0) {
