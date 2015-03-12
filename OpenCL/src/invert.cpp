@@ -16,7 +16,7 @@
 using namespace std;
 
 int invert(int argc, char* argv[]) {
-	if (argc != 2) {
+	if (argc != 3) {
 		cout << "Invalid number of arguments." << endl;
 		return 0;
 	}
@@ -25,7 +25,7 @@ int invert(int argc, char* argv[]) {
 	Image *output_image;
 	int errortga;
 
-	if ((errortga = TGA_readImage(argv[0], &input_image)) != 0) {
+	if ((errortga = TGA_readImage(argv[1], &input_image)) != 0) {
 		cout << "Error when opening image: " << errortga << endl;
 		return 0;
 	}
@@ -36,7 +36,7 @@ int invert(int argc, char* argv[]) {
 		return 0;
 	}
 
-	Opencl_launcher ocl;
+	Opencl_launcher ocl(argv[0]);
 	cl_int error;
 	cl_kernel invert_kernel = ocl.load_kernel("src/invert_kernel.cl", "invert");
 	cl_context context = ocl.getContext();
@@ -74,7 +74,7 @@ int invert(int argc, char* argv[]) {
 		output_image->data[c] = (uint8_t*) dataInput;
 	}
 
-	if ((errortga = TGA_writeImage(argv[1], output_image)) != 0) {
+	if ((errortga = TGA_writeImage(argv[2], output_image)) != 0) {
 		cout << "Error when writing image: " << errortga << endl;
 	}
 

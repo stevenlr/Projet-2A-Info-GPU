@@ -16,7 +16,7 @@
 using namespace std;
 
 int threshold(int argc, char* argv[]) {
-	if (argc != 3) {
+	if (argc != 4) {
 		cout << "Invalid number of arguments." << endl;
 		return 0;
 	}
@@ -24,9 +24,9 @@ int threshold(int argc, char* argv[]) {
 	Image *input_image;
 	Image *output_image;
 	int errortga;
-	uint8_t value = (uint8_t) atoi(argv[1]);
+	uint8_t value = (uint8_t) atoi(argv[2]);
 
-	if ((errortga = TGA_readImage(argv[0], &input_image)) != 0) {
+	if ((errortga = TGA_readImage(argv[1], &input_image)) != 0) {
 		cout << "Error when opening image: " << errortga << endl;
 		return 0;
 	}
@@ -37,7 +37,7 @@ int threshold(int argc, char* argv[]) {
 		return 0;
 	}
 
-	Opencl_launcher ocl;
+	Opencl_launcher ocl(argv[0]);
 	cl_int error;
 	cl_kernel threshold_kernel = ocl.load_kernel("src/threshold_kernel.cl", "threshold");
 	cl_context context = ocl.getContext();
@@ -79,7 +79,7 @@ int threshold(int argc, char* argv[]) {
 		output_image->data[c] = (uint8_t*) dataInput;
 	}
 
-	if ((errortga = TGA_writeImage(argv[2], output_image)) != 0) {
+	if ((errortga = TGA_writeImage(argv[3], output_image)) != 0) {
 		cout << "Error when writing image: " << errortga << endl;
 	}
 

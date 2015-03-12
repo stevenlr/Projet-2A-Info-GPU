@@ -12,9 +12,10 @@
 
 using namespace std;
 
-Opencl_launcher::Opencl_launcher(){
+Opencl_launcher::Opencl_launcher(string name){
 	// Platform
 	cl_platform_id* platforms;
+	cl_device_type device_type;
 	clGetPlatformIDs(0, NULL, &nbPlatforms);
 	platforms = new cl_platform_id[nbPlatforms];
 	clGetPlatformIDs(nbPlatforms, platforms, NULL);
@@ -22,9 +23,16 @@ Opencl_launcher::Opencl_launcher(){
 	char vendor[100];
 	for (int i = 0; i < nbPlatforms; ++i) {
 		clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
-		
-		if (strncmp(vendor, "NVIDIA", 5) == 0)
-			platform = platforms[i];
+
+		if (strncmp(vendor, name.c_str(), 5) == 0) {
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, sizeof(vendor), vendor, NULL);
+			
+			if (strncmp(name.c_str(), "Intel", 5) == 0){
+				if (strncmp(vendor, "OpenCL 1", 8) == 0)
+					platform = platforms[i];
+			} else
+				platform = platforms[i];
+		}
 	}
 
 	delete[] platforms;

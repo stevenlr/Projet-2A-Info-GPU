@@ -46,7 +46,7 @@ const char* getSource(const char* filePath) {
 
 int main(int argc, char *argv[])
 {
-	if (argc < 3) {
+	if (argc < 4) {
 		cout << "Usage: " << argv[0] << "<filter> <input1> <input2> ... <inputn> <output>\n" << endl;
 		cout << "Filters:" << endl;
 		cout << "\tadd: 2 input images." << endl;

@@ -34,11 +34,18 @@ cleanall: clean
 output-images:
 	mkdir output-images
 
-run: output-images $(BIN)
-	$(BIN) invert ../references/input-images/Lenna.tga output-images/invert.tga
-	$(BIN) threshold ../references/input-images/Lenna.tga 127 output-images/threshold.tga
-	$(BIN) add ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
+run: run_nvidia run_intel
+
+run_nvidia: output-images $(BIN)
+	$(BIN) invert NVIDIA ../references/input-images/Lenna.tga output-images/invert.tga
+	$(BIN) threshold NVIDIA ../references/input-images/Lenna.tga 127 output-images/threshold.tga
+	$(BIN) add NVIDIA ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
 	
+run_intel: output-images $(BIN)
+	$(BIN) invert Intel ../references/input-images/Lenna.tga output-images/invert.tga
+	$(BIN) threshold Intel ../references/input-images/Lenna.tga 127 output-images/threshold.tga
+	$(BIN) add Intel ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
+
 run_future:
 	$(BIN) erosion ../references/input-images/binary.tga 3 output-images/erosion-binary.tga
 	$(BIN) erosion ../references/input-images/Lenna.tga 1 output-images/erosion-colors.tga

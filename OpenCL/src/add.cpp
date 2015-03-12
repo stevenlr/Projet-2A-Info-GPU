@@ -16,7 +16,7 @@
 using namespace std;
 
 int add(int argc, char* argv[]) {
-	if (argc != 3) {
+	if (argc != 4) {
 		cout << "Invalid number of arguments." << endl;
 		return 0;
 	}
@@ -26,12 +26,12 @@ int add(int argc, char* argv[]) {
 	Image *output_image;
 	int errortga;
 
-	if ((errortga = TGA_readImage(argv[0], &input_image1)) != 0) {
+	if ((errortga = TGA_readImage(argv[1], &input_image1)) != 0) {
 		cout << "Error when opening image: " << errortga << endl;
 		return 0;
 	}
 
-	if ((errortga = TGA_readImage(argv[1], &input_image2)) != 0) {
+	if ((errortga = TGA_readImage(argv[2], &input_image2)) != 0) {
 		cout << "Error when opening image: " << errortga << endl;
 		Image_delete(input_image1);
 		return 0;
@@ -44,7 +44,7 @@ int add(int argc, char* argv[]) {
 		return 0;
 	}
 
-	Opencl_launcher ocl;
+	Opencl_launcher ocl(argv[0]);
 	cl_int error;
 	cl_kernel add_kernel = ocl.load_kernel("src/add_kernel.cl", "add");
 	cl_context context = ocl.getContext();
@@ -85,7 +85,7 @@ int add(int argc, char* argv[]) {
 		output_image->data[c] = (uint8_t*) dataInput1;
 	}
 
-	if ((errortga = TGA_writeImage(argv[2], output_image)) != 0) {
+	if ((errortga = TGA_writeImage(argv[3], output_image)) != 0) {
 		cout << "Error when writing image: " << errortga << endl;
 	}
 
