@@ -14,7 +14,7 @@ public:
 private:
 	cl_int error = 0;
 	cl_platform_id platform;
-	cl_uint nbPlatforms;
+	cl_uint nb_platforms;
 	cl_context context;
 	cl_command_queue queue;
 	cl_device_id device;

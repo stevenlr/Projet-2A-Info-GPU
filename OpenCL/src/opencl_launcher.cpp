@@ -15,12 +15,12 @@ Opencl_launcher::Opencl_launcher(string name){
 	// Platform
 	cl_platform_id* platforms;
 	cl_device_type device_type;
-	clGetPlatformIDs(0, NULL, &nbPlatforms);
-	platforms = new cl_platform_id[nbPlatforms];
-	clGetPlatformIDs(nbPlatforms, platforms, NULL);
+	clGetPlatformIDs(0, NULL, &nb_platforms);
+	platforms = new cl_platform_id[nb_platforms];
+	clGetPlatformIDs(nb_platforms, platforms, NULL);
 
 	char vendor[100];
-	for (int i = 0; i < nbPlatforms; ++i) {
+	for (int i = 0; i < nb_platforms; ++i) {
 		clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
 
 		if (strncmp(vendor, name.c_str(), 5) == 0) {

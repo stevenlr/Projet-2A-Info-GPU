@@ -48,14 +48,12 @@ int threshold(int argc, char* argv[]) {
 	cl_mem data;
 	const size_t local_ws = 192;
 	const size_t global_ws = shrRoundUp(local_ws, size);
-	cl_uchar16* dataInput; 
 	cl_event event;
 
 	cl_float valueF = static_cast<float>(value);
 	cl_float16 valueF16 = {valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF,valueF};
 
 	for (int c = 0; c < input_image->channels; ++c) {
-		dataInput =  (cl_uchar16*) output_image->data[c];
 		data = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, output_image->data[c], &error);
 		assert(error == CL_SUCCESS);
 
@@ -71,14 +69,12 @@ int threshold(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, dataInput, 0, NULL, &event);
+		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, &event);
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
 
 		ocl.total_time();
-		
-		output_image->data[c] = (uint8_t*) dataInput;
 	}
 
 	if ((errortga = TGA_writeImage(argv[3], output_image)) != 0) {

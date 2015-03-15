@@ -55,14 +55,11 @@ int add(int argc, char* argv[]) {
 	cl_mem data1, data2;
 	const size_t local_ws = 192;
 	const size_t global_ws = shrRoundUp(local_ws, size);
-	cl_uchar16 *dataInput1, *dataInput2; 
 	cl_event event;
 
 	for (int c = 0; c < input_image1->channels; ++c) {
-		dataInput1 = (cl_uchar16*) output_image->data[c];
-		dataInput2 = (cl_uchar16*) input_image2->data[c];
-		data1 = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, dataInput1, &error);
-		data2 = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, mem_size, dataInput2, &error);
+		data1 = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, output_image->data[c], &error);
+		data2 = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, mem_size, input_image2->data[c], &error);
 		assert(error == CL_SUCCESS);
 
 		error = clSetKernelArg(add_kernel, 0, sizeof(cl_mem), &data1);
@@ -77,14 +74,12 @@ int add(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, dataInput1, 0, NULL, &event);
+		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, &event);
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
 
 		ocl.total_time();
-
-		output_image->data[c] = (uint8_t*) dataInput1;
 	}
 
 	if ((errortga = TGA_writeImage(argv[3], output_image)) != 0) {
