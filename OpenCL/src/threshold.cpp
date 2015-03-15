@@ -40,13 +40,13 @@ int threshold(int argc, char* argv[]) {
 	Opencl_launcher ocl(argv[0]);
 	cl_int error;
 	cl_kernel threshold_kernel = ocl.load_kernel("src/threshold_kernel.cl", "threshold");
-	cl_context context = ocl.getContext();
-	cl_command_queue queue = ocl.getQueue();
+	cl_context context = ocl.get_context();
+	cl_command_queue queue = ocl.get_queue();
 
 	int size = input_image->height * input_image->width / 16;
 	const int mem_size = sizeof(cl_uchar16) * size;
 	cl_mem data;
-	const size_t local_ws = 256;
+	const size_t local_ws = 192;
 	const size_t global_ws = shrRoundUp(local_ws, size);
 	cl_uchar16* dataInput; 
 	cl_event event;
@@ -76,6 +76,8 @@ int threshold(int argc, char* argv[]) {
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
 
+		ocl.total_time();
+		
 		output_image->data[c] = (uint8_t*) dataInput;
 	}
 

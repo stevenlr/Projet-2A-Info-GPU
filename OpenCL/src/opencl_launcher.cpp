@@ -67,11 +67,11 @@ Opencl_launcher::~Opencl_launcher(){
 	clReleaseContext(context);
 }
 
-cl_context Opencl_launcher::getContext(){
+cl_context Opencl_launcher::get_context(){
 	return context;
 }
 
-cl_command_queue Opencl_launcher::getQueue(){
+cl_command_queue Opencl_launcher::get_queue(){
 	return queue;
 }
 
@@ -83,7 +83,17 @@ void Opencl_launcher::benchmark(cl_event event, string name){
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	
 	total_time = time_end - time_start;
+
+	if (strncmp(name.c_str(), "Exec", 4) == 0)
+		time_transfer_exec = total_time;
+	else
+		time_transfer_exec += total_time * 2;
+	
 	cout << name << " in seconds = " << (total_time / 1000000.0) << "ms" << endl;
+}
+
+void Opencl_launcher::total_time(){
+	cout << "Total time in seconds = " << (time_transfer_exec / 1000000.0) << "ms" << endl;
 }
 
 cl_kernel Opencl_launcher::load_kernel(string file, string name){

@@ -47,13 +47,13 @@ int add(int argc, char* argv[]) {
 	Opencl_launcher ocl(argv[0]);
 	cl_int error;
 	cl_kernel add_kernel = ocl.load_kernel("src/add_kernel.cl", "add");
-	cl_context context = ocl.getContext();
-	cl_command_queue queue = ocl.getQueue();
+	cl_context context = ocl.get_context();
+	cl_command_queue queue = ocl.get_queue();
 
 	int size = input_image1->height * input_image1->width / 16;
 	const int mem_size = sizeof(cl_uchar16) * size;
 	cl_mem data1, data2;
-	const size_t local_ws = 256;
+	const size_t local_ws = 192;
 	const size_t global_ws = shrRoundUp(local_ws, size);
 	cl_uchar16 *dataInput1, *dataInput2; 
 	cl_event event;
@@ -81,6 +81,8 @@ int add(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
+
+		ocl.total_time();
 
 		output_image->data[c] = (uint8_t*) dataInput1;
 	}
