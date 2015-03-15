@@ -26,23 +26,24 @@ using namespace tbb;
 class ErosionParallel 
 {
 public:
-	ErosionParallel(Image *input_image, Image *output_image, int radius, uint8_t *data_store, int channel) :
-		input_image(input_image), output_image(output_image), radius(radius), data_store(data_store), c(channel)
+	ErosionParallel(Image *input_image, Image *output_image, int radius, int channel) :
+		input_image(input_image), output_image(output_image), radius(radius), c(channel)
  	{ }
 
 	void operator()(int i) const
 	{
 		int j, x, y;
-		uint8_t *in_data, *out_data;
+		uint8_t *in_data, *out_data, *data_store;
 		uint8_t current_min;
 		int line_offset = input_image->width;
 		__m128i src, tmpmin;
 
+		data_store = (uint8_t *) aligned_malloc(sizeof(uint8_t) * 16, 16);
 		in_data = input_image->data[c];
 		out_data = output_image->data[c] + i * line_offset;
 		y = i;
 
-		for (j = 0; j < line_offset; j += 16) {
+		for (j = 0; j < line_offset; ++j) {
 			x = j;
 			current_min = 0xff;
 
@@ -53,7 +54,7 @@ public:
 			int xx, yy;
 			
 			for (xx = x1; xx <= x2; xx += 16) {
-				uint8_t *region = in_data + Image_getOffset(input_image, x1, y1);
+				uint8_t *region = in_data + Image_getOffset(input_image, xx, y1);
 
 				tmpmin = _mm_setr_epi32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
 
@@ -76,13 +77,14 @@ public:
 
 			*out_data++ = current_min;
 		}
+
+		aligned_free(data_store);
 	}
 
 private:
 	Image *input_image;
 	Image *output_image;
 	int radius;
-	uint8_t *data_store;
 	int c;
 };
 
@@ -116,22 +118,11 @@ void erosion(int argc, char *argv[])
 		return;
 	}
 
-	uint8_t *data_store;
-
-	data_store = (uint8_t *) aligned_malloc(sizeof(uint8_t) * 16, 16);
-
-	if (data_store == NULL) {
-		printf("Error when allocating store memory.\n");
-		Image_delete(input_image);
-		Image_delete(output_image);
-		return;
-	}
-
 	Benchmark bench;
 	start_benchmark(&bench);
 
 	for (int i = 0; i < input_image->channels; ++i) {
-		ErosionParallel erosionParallel(input_image, output_image, radius, data_store, i);
+		ErosionParallel erosionParallel(input_image, output_image, radius, i);
 		parallel_for(0, input_image->height, erosionParallel);
 	}
 
@@ -143,7 +134,6 @@ void erosion(int argc, char *argv[])
 		cout << "Error when writing image " << error << endl;
 	}
 
-	aligned_free(data_store);
 	Image_delete(input_image);
 	Image_delete(output_image);
 }

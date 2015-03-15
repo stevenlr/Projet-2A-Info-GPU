@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
 	Image *ref_image;
 	Image *test_image;
-	int error = 0;
+	long error = 0;
 	char *file_path_reference = argv[1];
 	char *file_path_test = argv[2];
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	}
 
 
-	float difference_percent = average_difference / (ref_image->height * ref_image->width * ref_image->channels * 255) * 100;
+	float difference_percent = average_difference / (((float) ref_image->height) * ref_image->width * ref_image->channels * 255) * 100;
 	average_difference /= (float) error;
 
 	if (error == 0) {

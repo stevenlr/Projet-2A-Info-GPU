@@ -1,0 +1,4 @@
+Réunion 29/01/2015
+===========================
+
+Premier rendu du rapport marchés (incomplet), parties sur l'architecture CUDA à placer ailleurs. Illustrations à ajouter pour expliquer les architectures. Paragraphes sur les API à placer ensemble dans une partie séparée.

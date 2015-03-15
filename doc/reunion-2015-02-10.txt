@@ -1,0 +1,9 @@
+Réunion 10/02/2015
+============================
+
+Soutenance à mi-parcours.
+--> Trop long !
+
+Passer moins de temps sur les explications techniques. Expliquer un ou deux algos en détail ainsi que leurs benchs, le reste dans le rapport.
+Explications techniques pas toujours au top. Imprécisions dans le vocabulaire (GPP/GPU/carte graphique/CPU).
+Fournir un lexique avant la présentation ainsi qu'un tableau et des graphiques récapitulant les benchs.
