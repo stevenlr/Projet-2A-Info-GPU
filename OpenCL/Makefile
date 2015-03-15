@@ -41,6 +41,7 @@ run_future:
 	$(BIN) threshold ../references/input-images/Lenna.tga 127 output-images/threshold.tga
 	$(BIN) add ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
 	$(BIN) erosion ../references/input-images/binary.tga 3 output-images/erosion-binary.tga
+	$(BIN) erosion ../references/input-images/binary.tga 10 output-images/erosion-binary-10.tga
 	$(BIN) erosion ../references/input-images/Lenna.tga 1 output-images/erosion-colors.tga
 	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/7x7gaussian.txt output-images/convolution-7x7gaussian-extend.tga
 	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/3x3sharpen.txt output-images/convolution-3x3sharpen-extend.tga
