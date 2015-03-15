@@ -1,6 +1,6 @@
 CXX=g++
-CXXFLAGS=-I../libimage/include -I"C:/Program Files (x86)/Intel/OpenCL SDK/4.6/include" -Iinclude -W -Wall -O3 -std=c++11
-LDFLAGS=-L../libimage/lib -limage -Llib -lOpenCL
+CXXFLAGS=-I../libimage/include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\NVIDIA GPU Computing SDK\OpenCL\common\inc" -Iinclude -W -Wall -O3 -std=c++11
+LDFLAGS=-L../libimage/lib -limage -L"C:\Program Files\NVIDIA GPU Computing Toolkit\NVIDIA GPU Computing SDK\OpenCL\common\lib\Win32" -lOpenCL
 BIN=bin/filters_opencl.exe
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, obj/%.o, $(SRC))
@@ -34,12 +34,19 @@ cleanall: clean
 output-images:
 	mkdir output-images
 
-run: output-images $(BIN)
-	$(BIN) ../references/input-images/Lenna.tga output-images/invert.tga
+run: run_nvidia run_intel
+
+run_nvidia: output-images $(BIN)
+	$(BIN) invert NVIDIA ../references/input-images/Lenna.tga output-images/invert.tga
+	$(BIN) threshold NVIDIA ../references/input-images/Lenna.tga 127 output-images/threshold.tga
+	$(BIN) add NVIDIA ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
 	
+run_intel: output-images $(BIN)
+	$(BIN) invert Intel ../references/input-images/Lenna.tga output-images/invert.tga
+	$(BIN) threshold Intel ../references/input-images/Lenna.tga 127 output-images/threshold.tga
+	$(BIN) add Intel ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
+
 run_future:
-	$(BIN) threshold ../references/input-images/Lenna.tga 127 output-images/threshold.tga
-	$(BIN) add ../references/input-images/Lenna.tga ../references/input-images/DS.tga output-images/add.tga
 	$(BIN) erosion ../references/input-images/binary.tga 3 output-images/erosion-binary.tga
 	$(BIN) erosion ../references/input-images/binary.tga 10 output-images/erosion-binary-10.tga
 	$(BIN) erosion ../references/input-images/Lenna.tga 1 output-images/erosion-colors.tga

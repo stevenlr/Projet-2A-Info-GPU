@@ -42,7 +42,7 @@ public:
 		out_data = output_image->data[c] + i * line_offset;
 		y = i;
 
-		for (j = 0; j < line_offset; j += 16) {
+		for (j = 0; j < line_offset; ++j) {
 			x = j;
 			current_min = 0xff;
 

@@ -1,9 +1,8 @@
-__kernel void invert(__global uint8* data,__global const int* size, __global uint8* data2)
+__kernel void invert(__global uchar16* data, const int size)
 {
-	const int idx = get_global_id(0);
-
-	data2[idx] = data[idx] ^ 0xFF;
-	if (idx < *size) {
-		data2[idx] = data[idx] ^ 0xFF;
+	int idx = get_local_size(0)*get_group_id(0) + get_local_id(0);
+	uchar x = 0xFF;
+	if (idx < size) {
+		data[idx] ^= x;
 	}
 }
