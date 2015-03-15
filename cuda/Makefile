@@ -1,4 +1,4 @@
-TARGETS=invert threshold add
+TARGETS=invert threshold add erosion
 
 all:
 	for t in $(TARGETS); do cd $$t && $(MAKE) && cd ..; done
