@@ -1,0 +1,8 @@
+Réusnion 27/02/2015
+===========================
+
+Début implémentation CUDA :
+ - Algorithmes en O(n) : léger gain par rapport à versions TBB+SSE sur GPP mais transfert des données coûteux.
+ - Meilleurs résultats avec nb threads/block 64, 128, 256 ou 512.
+
+Second rendu du rapport marchés : quelques ajouts (illustrations) et précisions à rajouter. Conclusions à écrire.
