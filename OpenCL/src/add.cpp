@@ -77,7 +77,7 @@ int add(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, dataInput1, 1, &event, &event);
+		error = clEnqueueReadBuffer(queue, data1, CL_TRUE, 0, mem_size, dataInput1, 0, NULL, &event);
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);

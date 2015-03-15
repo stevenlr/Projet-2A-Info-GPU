@@ -71,7 +71,7 @@ int threshold(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, output_image->data[c], 1, &event, &event);
+		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, dataInput, 0, NULL, &event);
 
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);

@@ -1,3 +1,5 @@
+#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
@@ -66,9 +68,10 @@ int invert(int argc, char* argv[]) {
 
 		ocl.benchmark(event, "Execution time");
 
-		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, dataInput, 1, &event, &event);
+		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, dataInput, 0, NULL, &event);
 
 		ocl.benchmark(event, "Transfer time");
+		cout << error << endl;
 		assert(error == CL_SUCCESS);
 
 		output_image->data[c] = (uint8_t*) dataInput;

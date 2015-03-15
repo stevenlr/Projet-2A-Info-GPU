@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <cstring>
 #include <cmath>
-
 #include "opencl_launcher.h"
 #include "main.h"
 
@@ -28,8 +27,10 @@ Opencl_launcher::Opencl_launcher(string name){
 			clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, sizeof(vendor), vendor, NULL);
 			
 			if (strncmp(name.c_str(), "Intel", 5) == 0){
-				if (strncmp(vendor, "OpenCL 1", 8) == 0)
+				if (strncmp(vendor, "OpenCL 1", 8) == 0){
 					platform = platforms[i];
+					break;
+				}
 			} else
 				platform = platforms[i];
 		}
