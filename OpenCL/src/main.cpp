@@ -12,7 +12,7 @@
 #include "add.h"
 #include "invert.h"
 #include "threshold.h"
-//#include "erosion.h"
+#include "erosion.h"
 //#include "convolution.h"
 
 using namespace std;
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	} else if (strcmp(argv[1], "convolution") == 0) {
 		//convolution(argc - 2, argv + 2);
 	} else if (strcmp(argv[1], "erosion") == 0) {
-		//erosion(argc - 2, argv + 2);
+		erosion(argc - 2, argv + 2);
 	} else {
 		cout << "Filter not implemented." << endl;
 	}
