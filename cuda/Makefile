@@ -1,4 +1,4 @@
-TARGETS=invert threshold add erosion
+TARGETS=invert threshold add erosion convolution
 
 all:
 	for t in $(TARGETS); do cd $$t && $(MAKE) && cd ..; done
