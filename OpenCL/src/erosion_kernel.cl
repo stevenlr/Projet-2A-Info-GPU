@@ -16,10 +16,10 @@ __kernel void erosion(__global uchar* datai, __global uchar* datao, const int wi
 		else if (ymax >= height)
 			ymax = height - 1;
 
-		uchar mini = 255;
+		uchar mini = convert_uchar(0xFF);
 
-		for (int y = ymin; y < ymax; ++y) {
-			for (int x = xmin; x < xmax; ++x) {
+		for (int y = ymin; y <= ymax; ++y) {
+			for (int x = xmin; x <= xmax; ++x) {
 				mini = min(mini, datai[width * y + x]);
 			}
 		}

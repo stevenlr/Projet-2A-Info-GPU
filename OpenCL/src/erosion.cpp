@@ -21,7 +21,8 @@ using namespace std;
 #define PROCESSED_SIZE 32
 #define MAX_RADIUS ((TILE_SIZE - PROCESSED_SIZE - 1) / 2)
 
-#define NORMAL2N
+#define ALGO2N
+//#define SHARED
 
 int erosion(int argc, char* argv[]) {
 	if (argc != 5) {
@@ -44,12 +45,6 @@ int erosion(int argc, char* argv[]) {
 		return 0;
 	}
 
-	Opencl_launcher ocl(argv[0]);
-	cl_int error;
-	cl_kernel erosion_kernel = ocl.load_kernel("src/erosion_kernel.cl", "erosion");
-	cl_context context = ocl.get_context();
-	cl_command_queue queue = ocl.get_queue();
-
 	int rx = atoi(argv[2]);
 	int ry = atoi(argv[3]);
 
@@ -66,13 +61,24 @@ int erosion(int argc, char* argv[]) {
 	
 	const size_t local_ws[2] = {PROCESSED_SIZE, PROCESSED_SIZE};
 	const size_t global_ws[2] = {shrRoundUp(local_ws[0], width), shrRoundUp(local_ws[1], height)};
+
+	#ifdef SHARED
+		const string kernel_name = "src/erosion_kernel2.cl";
+	#else
+		const string kernel_name = "src/erosion_kernel.cl";
+	#endif
+
+	Opencl_launcher ocl(argv[0]);
+	cl_int error;
+	cl_kernel erosion_kernel = ocl.load_kernel(kernel_name.c_str(), "erosion");
+	cl_context context = ocl.get_context();
+	cl_command_queue queue = ocl.get_queue();
 	cl_event event;
 
 	for (int c = 0; c < input_image->channels; ++c) {
 		data = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, output_image->data[c], &error);
-		assert(error == CL_SUCCESS);
 
-		#ifdef NORMAL2N
+		#ifdef ALGO2N
 		ry = 0;
 		dataInput = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, mem_size, input_image->data[c], &error);
 		error = clSetKernelArg(erosion_kernel, 0, sizeof(cl_mem), &data);
@@ -95,14 +101,10 @@ int erosion(int argc, char* argv[]) {
 		assert(error == CL_SUCCESS);
 		clWaitForEvents(1 , &event);
 
-		ocl.benchmark(event, "Execution time");
-
-		#ifdef NORMAL2N /*
+		#ifdef ALGO2N 
+		ocl.benchmark(event, "ExecD");
 		ry = atoi(argv[3]);
 		rx = 0;
-		error = clEnqueueReadBuffer(queue, dataInput, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, &event);
-		clWaitForEvents(1 , &event);
-		assert(error == CL_SUCCESS);
 
 		error = clSetKernelArg(erosion_kernel, 0, sizeof(cl_mem), &dataInput);
 		error |= clSetKernelArg(erosion_kernel, 1, sizeof(cl_mem), &data);
@@ -116,9 +118,10 @@ int erosion(int argc, char* argv[]) {
 		error = clEnqueueNDRangeKernel(queue, erosion_kernel, 2, NULL, global_ws, local_ws, 0, NULL, &event);
 		assert(error == CL_SUCCESS);
 		clWaitForEvents(1 , &event);
-
-		ocl.benchmark(event, "Execution time"); */
 		#endif
+
+		ocl.benchmark(event, "Execution time");
+		
 
 		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, &event);
 

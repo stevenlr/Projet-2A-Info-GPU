@@ -10,7 +10,7 @@ __kernel void erosion(__global uchar* datai, __global uchar* datao, const int wi
 	int idy = get_local_size(1)*get_group_id(1);
 
 	if (idx+tx < width && idy+ty < height) {
-		localData[TILE_SIZE * (ry + ty) + rx + tx] = datai[width * (idy + ty) + idx + tx];
+		//localData[TILE_SIZE * (ry + ty) + rx + tx] = datai[width * (idy + ty) + idx + tx];
 
 		int xmin = tx, xmax = tx;
 		int ymin = ty, ymax = ty;

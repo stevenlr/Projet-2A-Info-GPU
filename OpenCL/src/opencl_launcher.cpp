@@ -85,11 +85,12 @@ void Opencl_launcher::benchmark(cl_event event, string name){
 	total_time = time_end - time_start;
 
 	if (strncmp(name.c_str(), "Exec", 4) == 0)
-		time_transfer_exec = total_time;
+		time_transfer_exec += total_time;
 	else
 		time_transfer_exec += total_time * 2;
 	
-	cout << name << " in seconds = " << (total_time / 1000000.0) << "ms" << endl;
+	if (strncmp(name.c_str(), "ExecD", 5) != 0)
+		cout << name << " in seconds = " << (total_time / 1000000.0) << "ms" << endl;
 }
 
 void Opencl_launcher::total_time(){
@@ -155,6 +156,9 @@ cl_kernel Opencl_launcher::load_kernel(string file, string name){
 		cout << "name" << endl;
 	else if (error == CL_INVALID_KERNEL_DEFINITION)
 		cout << "def" << endl;
+	else if (error != CL_SUCCESS)
+		cout << error << endl;
+
 	assert(error == CL_SUCCESS);
 
 	return kernel;
