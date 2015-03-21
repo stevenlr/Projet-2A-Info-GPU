@@ -1,3 +1,9 @@
+/**
+ * @file add.cpp
+ * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
+ * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
+ */
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
@@ -46,7 +52,7 @@ int add(int argc, char* argv[]) {
 
 	Opencl_launcher ocl(argv[0]);
 	cl_int error;
-	cl_kernel add_kernel = ocl.load_kernel("src/add_kernel.cl", "add");
+	cl_kernel add_kernel = ocl.load_kernel("src/kernel/add_kernel.cl", "add");
 	cl_context context = ocl.get_context();
 	cl_command_queue queue = ocl.get_queue();
 

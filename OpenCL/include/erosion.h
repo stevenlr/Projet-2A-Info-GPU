@@ -12,6 +12,6 @@
  * @param argc Number of arguments.
  * @param argv Program arguments.
  */
-void erosion(int argc, char *argv[]);
+int erosion(int argc, char *argv[]);
 
  #endif

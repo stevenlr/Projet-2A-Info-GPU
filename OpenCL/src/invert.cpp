@@ -1,4 +1,8 @@
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+/**
+ * @file invert.cpp
+ * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
+ * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
+ */
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <cstdlib>
 #include <cassert>
@@ -40,7 +44,7 @@ int invert(int argc, char* argv[]) {
 
 	Opencl_launcher ocl(argv[0]);
 	cl_int error;
-	cl_kernel invert_kernel = ocl.load_kernel("src/invert_kernel.cl", "invert");
+	cl_kernel invert_kernel = ocl.load_kernel("src/kernel/invert_kernel.cl", "invert");
 	cl_context context = ocl.get_context();
 	cl_command_queue queue = ocl.get_queue();
 

@@ -1,3 +1,9 @@
+/**
+ * @file threshold.cpp
+ * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
+ * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
+ */
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
@@ -39,7 +45,7 @@ int threshold(int argc, char* argv[]) {
 
 	Opencl_launcher ocl(argv[0]);
 	cl_int error;
-	cl_kernel threshold_kernel = ocl.load_kernel("src/threshold_kernel.cl", "threshold");
+	cl_kernel threshold_kernel = ocl.load_kernel("src/kernel/threshold_kernel.cl", "threshold");
 	cl_context context = ocl.get_context();
 	cl_command_queue queue = ocl.get_queue();
 

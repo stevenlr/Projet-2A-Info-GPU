@@ -43,6 +43,8 @@ run_nvidia: output-images $(BIN)
 	$(BIN) erosion NVIDIA ../references/input-images/binary.tga 3 3 output-images/erosion-binary.tga
 	$(BIN) erosion NVIDIA ../references/input-images/binary.tga 10 10 output-images/erosion-binary-10.tga
 	$(BIN) erosion NVIDIA ../references/input-images/Lenna.tga 1 1 output-images/erosion-colors.tga
+	$(BIN) convolution NVIDIA ../references/input-images/Lenna.tga ../references/matrices/7x7gaussian.txt output-images/convolution-7x7gaussian-extend.tga
+	$(BIN) convolution NVIDIA ../references/input-images/Lenna.tga ../references/matrices/3x3sharpen.txt output-images/convolution-3x3sharpen-extend.tga
 
 run_intel: output-images $(BIN)
 	$(BIN) invert Intel ../references/input-images/Lenna.tga output-images/invert.tga
@@ -51,10 +53,8 @@ run_intel: output-images $(BIN)
 	$(BIN) erosion Intel ../references/input-images/binary.tga 3 3 output-images/erosion-binary.tga
 	$(BIN) erosion Intel ../references/input-images/binary.tga 10 10 output-images/erosion-binary-10.tga
 	$(BIN) erosion Intel ../references/input-images/Lenna.tga 1 1 output-images/erosion-colors.tga
-
-run_future:
-	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/7x7gaussian.txt output-images/convolution-7x7gaussian-extend.tga
-	$(BIN) convolution ../references/input-images/Lenna.tga ../references/matrices/3x3sharpen.txt output-images/convolution-3x3sharpen-extend.tga
+	$(BIN) convolution Intel ../references/input-images/Lenna.tga ../references/matrices/7x7gaussian.txt output-images/convolution-7x7gaussian-extend.tga
+	$(BIN) convolution Intel ../references/input-images/Lenna.tga ../references/matrices/3x3sharpen.txt output-images/convolution-3x3sharpen-extend.tga
 
 depend.d: $(SRC) $(HDR)
 	rm -f $@

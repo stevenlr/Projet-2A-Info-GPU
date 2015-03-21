@@ -1,3 +1,8 @@
+/**
+ * @file opencl_launcher.cpp
+ * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
+ * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
+ */
 #include <cstdlib>
 #include <cassert>
 #include <iostream>

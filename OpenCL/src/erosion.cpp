@@ -1,4 +1,8 @@
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+/**
+ * @file erosion.cpp
+ * @author Steven Le Rouzic <lerouzic@ecole.ensicaen.fr>
+ * @author Gautier Boëda <boeda@ecole.ensicaen.fr>
+ */
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <cstdlib>
 #include <cassert>
@@ -21,8 +25,8 @@ using namespace std;
 #define PROCESSED_SIZE 32
 #define MAX_RADIUS ((TILE_SIZE - PROCESSED_SIZE - 1) / 2)
 
-#define ALGO2N
-//#define SHARED
+//#define ALGO2N
+#define SHARED
 
 int erosion(int argc, char* argv[]) {
 	if (argc != 5) {
@@ -63,9 +67,9 @@ int erosion(int argc, char* argv[]) {
 	const size_t global_ws[2] = {shrRoundUp(local_ws[0], width), shrRoundUp(local_ws[1], height)};
 
 	#ifdef SHARED
-		const string kernel_name = "src/erosion_kernel2.cl";
+		const string kernel_name = "src/kernel/erosion_kernel2.cl";
 	#else
-		const string kernel_name = "src/erosion_kernel.cl";
+		const string kernel_name = "src/kernel/erosion_kernel.cl";
 	#endif
 
 	Opencl_launcher ocl(argv[0]);

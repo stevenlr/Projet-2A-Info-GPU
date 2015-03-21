@@ -12,6 +12,6 @@
  * @param argc number of arguments.
  * @param argv Program arguments.
  */
-void threshold(int argc, char *argv[]);
+int threshold(int argc, char *argv[]);
 
 #endif
