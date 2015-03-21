@@ -177,6 +177,7 @@ int convolution(int argc, char* argv[]) {
 
 	Image_delete(input_image);
 	Image_delete(output_image);
+	kernel_delete(kernel);
 
 	return 1;
 }
