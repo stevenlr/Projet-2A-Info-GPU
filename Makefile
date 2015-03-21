@@ -34,6 +34,9 @@ run_tbb:
 run_cuda:
 	cd cuda && $(MAKE) run
 
+run_opencl:
+	cd OpenCL && $(MAKE) run
+
 run_tests_gpp:
 	cd tests && $(MAKE) run_gpp
 
@@ -48,3 +51,6 @@ run_tests_cuda:
 
 run_profile_cuda:
 	cd cuda && $(MAKE) profile
+
+run_tests_opencl:
+	cd tests && $(MAKE) run_opencl

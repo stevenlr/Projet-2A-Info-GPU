@@ -48,4 +48,7 @@ run_tbb: $(BIN)
 run_cuda: $(BIN)
 	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../cuda/output-images/$$f.tga ; done
 
+run_opencl: $(BIN)
+	for f in $(BASENAME_IMAGE); do echo "[$$f] :"; $(BIN) ../references/output-images/$$f.tga ../OpenCL/output-images/$$f.tga ; done
+
 include depend.d
