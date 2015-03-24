@@ -1,0 +1,8 @@
+Réunion 16/03/2015
+===============================
+
+Présentation des benchs CUDA et OpenCL.
+Reste convolution CUDA et érosion et convolution OpenCL à implémenter.
+Version finale du rapport marché et architecture validé.
+
+Commencer l'écriture du rapport dont va découler l'écriture de la soutenance.
