@@ -25,8 +25,8 @@ using namespace std;
 #define PROCESSED_SIZE 32
 #define MAX_RADIUS ((TILE_SIZE - PROCESSED_SIZE - 1) / 2)
 
-//#define ALGO2N
-#define SHARED
+#define ALGO2N
+//#define SHARED
 
 int erosion(int argc, char* argv[]) {
 	if (argc != 5) {

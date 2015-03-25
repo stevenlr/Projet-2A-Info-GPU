@@ -1,6 +1,8 @@
+include ../MakefileConfig.inc
+
 CXX=g++
-CXXFLAGS=-I../libimage/include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\NVIDIA GPU Computing SDK\OpenCL\common\inc" -Iinclude -W -Wall -O3 -std=c++11
-LDFLAGS=-L../libimage/lib -limage -L"C:\Program Files\NVIDIA GPU Computing Toolkit\NVIDIA GPU Computing SDK\OpenCL\common\lib\Win32" -lOpenCL
+CXXFLAGS=-I../libimage/include -I$(OpenCLIncludePath) -Iinclude -W -Wall -O3 -std=c++11
+LDFLAGS=-L../libimage/lib -limage -L$(OpenCLLibPath) -lOpenCL
 BIN=bin/filters_opencl.exe
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, obj/%.o, $(SRC))

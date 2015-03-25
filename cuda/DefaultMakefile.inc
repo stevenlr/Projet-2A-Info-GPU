@@ -1,5 +1,7 @@
+include ../../MakefileConfig.inc
+
 CC=nvcc
-NVCCFLAGS=-ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin" -m32
+NVCCFLAGS=-ccbin $(VCPath) -m32
 CFLAGS=-I../../libimage/include -O3
 LDFLAGS=-L../../libimage-vc -limage
 BIN=bin/$(BINNAME).exe

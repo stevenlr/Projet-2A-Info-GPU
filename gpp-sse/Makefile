@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I../libimage/include -Iinclude -W -Wall -std=c99 -O3 -msse -msse2 -mssse3
+CFLAGS=-I../libimage/include -Iinclude -W -Wall -std=c99 -O3 -msse -msse2
 LDFLAGS=-L../libimage/lib -limage
 BIN=bin/filters-gpp-sse.exe
 SRC=$(wildcard src/*.c)

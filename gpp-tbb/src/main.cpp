@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
+#include <cstdint>
 
 #include "add.h"
 #include "invert.h"
@@ -16,8 +17,41 @@
 
 using namespace std;
 
+int check_sse()
+{
+	uint32_t highest_reg;
+	uint32_t infos_d, infos_c;
+	uint32_t param = 0;
+
+	__asm__ (
+		"cpuid\n\t"
+		: "=a" (highest_reg)
+		: "a" (param)
+	);
+
+	if (highest_reg < 1)
+		return 0;
+
+	param = 1;
+	__asm__ (
+		"cpuid\n\t"
+		: "=d" (infos_d), "=c" (infos_c)
+		: "a" (param)
+	);
+
+	const uint32_t sse_flag = 1 << 25;
+	const uint32_t sse2_flag = 1 << 26;
+
+	return (sse_flag & infos_d) && (sse2_flag & infos_d);
+}
+
 int main(int argc, char *argv[])
 {
+	if (!check_sse()) {
+		cout << "Error : SSE or SSE2 not supported." << endl;
+		return 1;
+	}
+
 	if (argc < 3) {
 		cout << "Usage: " << argv[0] << "<filter> <input1> <input2> ... <inputn> <output>\n" << endl;
 		cout << "Filters:" << endl;

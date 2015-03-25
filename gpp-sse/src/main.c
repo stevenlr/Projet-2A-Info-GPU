@@ -39,16 +39,14 @@ int check_sse()
 
 	const uint32_t sse_flag = 1 << 25;
 	const uint32_t sse2_flag = 1 << 26;
-	const uint32_t ssse3_flag = 1 << 9;
 
-	return (sse_flag & infos_d) && (sse2_flag & infos_d)
-		&& (ssse3_flag & infos_c);
+	return (sse_flag & infos_d) && (sse2_flag & infos_d);
 }
 
 int main(int argc, char *argv[])
 {
 	if (!check_sse()) {
-		printf("Error : SSE, SSE2 or SSSE3 not supported.\n");
+		printf("Error : SSE or SSE2 not supported.\n");
 	}
 
 	if (argc < 2) {

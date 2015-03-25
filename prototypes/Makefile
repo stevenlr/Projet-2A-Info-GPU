@@ -1,6 +1,8 @@
+include ../MakefileConfig.inc
+
 CXX=g++
-LDFLAGS=-lpandore -LC:\pandore\lib
-CXXFLAGS=-IC:\pandore\include
+LDFLAGS=-lpandore -L$(PandoreLibPath)
+CXXFLAGS=-I$(PandoreIncludePath)
 SRC=$(wildcard src/*.cpp)
 BINS=$(patsubst src/%.cpp, bin/%.exe, $(SRC))
 IMGSPAN=$(wildcard *.pan)

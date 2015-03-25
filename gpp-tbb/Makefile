@@ -1,6 +1,8 @@
+include ../MakefileConfig.inc
+
 CXX=g++
-CXXFLAGS=-I../libimage/include -Iinclude -IC:\IntelTBB\include -W -Wall -O3 -std=c++11 -msse -msse2 -mssse3
-LDFLAGS=-L../libimage/lib -limage -LC:\IntelTBB\bin\mingw32 -ltbb
+CXXFLAGS=-I../libimage/include -Iinclude -I$(IntelTBBIncludePath) -W -Wall -O3 -std=c++11 -msse -msse2
+LDFLAGS=-L../libimage/lib -limage -L$(IntelTBBLibPath) -ltbb
 BIN=bin/filters-gpp-tbb.exe
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp, obj/%.o, $(SRC))
