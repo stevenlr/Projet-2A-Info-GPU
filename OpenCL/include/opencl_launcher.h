@@ -58,6 +58,7 @@ private:
 	cl_device_id device;
 	cl_kernel kernel;
 	double time_transfer_exec = 0;
+	bool multiple_exec = false;
 };
 
 #endif

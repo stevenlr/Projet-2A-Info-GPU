@@ -23,7 +23,9 @@ using namespace std;
 
 #define TILE_SIZE 128
 #define PROCESSED_SIZE 32
+#define PROCESSED_SIZE_INTEL 16
 #define MAX_RADIUS ((TILE_SIZE - PROCESSED_SIZE - 1) / 2)
+#define MAX_RADIUS_INTEL ((TILE_SIZE - PROCESSED_SIZE_INTEL - 1) / 2)
 
 #define ALGO2N
 //#define SHARED
@@ -52,7 +54,8 @@ int erosion(int argc, char* argv[]) {
 	int rx = atoi(argv[2]);
 	int ry = atoi(argv[3]);
 
-	if (rx < 0 || rx >= MAX_RADIUS || ry < 0 || ry >= MAX_RADIUS) {
+	int max_radius = strncmp(argv[0], "Intel", 5) == 0 ? MAX_RADIUS_INTEL : MAX_RADIUS;
+	if (rx < 0 || rx >= max_radius || ry < 0 || ry >= max_radius) {
 		printf("Invalid radius value.\n");
 		Image_delete(input_image);
 		return 1;
@@ -63,7 +66,13 @@ int erosion(int argc, char* argv[]) {
 	const int mem_size = sizeof(cl_uchar) * size;
 	cl_mem data, dataInput;
 	
-	const size_t local_ws[2] = {PROCESSED_SIZE, PROCESSED_SIZE};
+	size_t local_ws[2];
+	if (strncmp(argv[0], "Intel", 5) == 0) {
+		local_ws[0] = PROCESSED_SIZE_INTEL; local_ws[1] = PROCESSED_SIZE_INTEL;
+	}
+	else {
+		local_ws[0] = PROCESSED_SIZE; local_ws[1] = PROCESSED_SIZE;
+	}
 	const size_t global_ws[2] = {shrRoundUp(local_ws[0], width), shrRoundUp(local_ws[1], height)};
 
 	#ifdef SHARED
@@ -101,7 +110,6 @@ int erosion(int argc, char* argv[]) {
 
 		clFinish(queue);
 		error = clEnqueueNDRangeKernel(queue, erosion_kernel, 2, NULL, global_ws, local_ws, 0, NULL, &event);
-
 		assert(error == CL_SUCCESS);
 		clWaitForEvents(1 , &event);
 
@@ -128,7 +136,6 @@ int erosion(int argc, char* argv[]) {
 		
 
 		error = clEnqueueReadBuffer(queue, data, CL_TRUE, 0, mem_size, output_image->data[c], 0, NULL, &event);
-
 		ocl.benchmark(event, "Transfer time");
 		assert(error == CL_SUCCESS);
 

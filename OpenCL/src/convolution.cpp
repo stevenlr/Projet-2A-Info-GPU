@@ -23,6 +23,7 @@
 using namespace std;
 
 #define PROCESSED_SIZE 32
+#define PROCESSED_SIZE_INTEL 16
 
 typedef struct {
 	int width;
@@ -134,7 +135,14 @@ int convolution(int argc, char* argv[]) {
 	int size = input_image->height * input_image->width / 16;
 	const int mem_size = sizeof(cl_uchar16) * size;
 	cl_mem data, dataInput, data_kernel;
-	const size_t local_ws[2] = {PROCESSED_SIZE, PROCESSED_SIZE};
+	
+	size_t local_ws[2];
+	if (strncmp(argv[0], "Intel", 5) == 0) {
+		local_ws[0] = PROCESSED_SIZE_INTEL; local_ws[1] = PROCESSED_SIZE_INTEL;
+	}
+	else {
+		local_ws[0] = PROCESSED_SIZE; local_ws[1] = PROCESSED_SIZE;
+	}
 	const size_t global_ws[2] = {shrRoundUp(local_ws[0], width), shrRoundUp(local_ws[1], height)};
 	cl_event event;
 

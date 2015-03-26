@@ -94,8 +94,14 @@ void Opencl_launcher::benchmark(cl_event event, string name){
 	else
 		time_transfer_exec += total_time * 2;
 	
-	if (strncmp(name.c_str(), "ExecD", 5) != 0)
+	if (strncmp(name.c_str(), "ExecD", 5) != 0 && !multiple_exec)
 		cout << name << " in seconds = " << (total_time / 1000000.0) << "ms" << endl;
+	else if (multiple_exec){
+		cout << name << " in seconds = " << (time_transfer_exec / 1000000.0) << "ms" << endl;
+		multiple_exec = false;
+	}
+	else
+		multiple_exec = true;
 }
 
 void Opencl_launcher::total_time(){

@@ -27,7 +27,7 @@ size_t shrRoundUp(size_t localWorkSize, size_t numItems) {
 	if (!x) {
 		return numItems;
 	}
-	return numItems + (localWorkSize - x) ;
+	return numItems + (localWorkSize - x);
 }
 
 
