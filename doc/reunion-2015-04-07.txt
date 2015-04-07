@@ -1,0 +1,24 @@
+Réunion 07/04/2015
+==========================
+
+Rapport :
+ - Mots de vocabulaire GPP et GPU à ressortir,
+   sous forme de puces, expliquer la différence :
+   GPP : superscalaire, intelligent, peu de coeurs, faible parallèlisme, mémoire unifiée
+   GPU : in order, peu d'intelligence, beaucoup de coeurs, fort parallélisme, mémoire non unifiée
+ - SSE : explications lourdes, couper le texte avec code et illustrations
+ - nuances vectorisation, parallélisation à expliquer avec schémas
+ - unifier schéma northbridge et carte mère
+
+Réunion entreprise :
+ - Améner discussion
+ - Demander la forme de l'entretien (présentation rapport ou slides)
+ - Informel
+ - Très technique
+
+Oral :
+ - Plus formel
+ - 3 minutes à la fin de gestion de projet
+ - Peu technique, amener les notions en douceur
+
+Envoyer les deux rapports par mail à l'entreprise.
