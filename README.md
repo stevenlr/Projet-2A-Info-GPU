@@ -6,6 +6,30 @@ Configuration
 
 Le fichier `MakefileConfig.inc` contient les chemins d'accès aux différentes librairies utilisées.
 
+Documentation (`doc/`)
+-------------------
+
+Les rapports ci-dessous y sont présents: 
+
+- Rapport sur le Marché et Architectures à GPU 
+- Rapport du projet 
+
+Les récapitulatifs des réunions au cours du projet y sont présents (`specs-pc.txt`).  
+Les benchmarks sur nos ordinateurs y sont présents (`benchs-finaux.xlsx`).  
+Les spécifications de nos PC y sont présents.  
+
+Pré-requis
+-------------------
+
+GCC (MinGW32)  
+[IntelTBB](http://www.threadingbuildingblocks.org) : headers et librairie requis   
+[OpenCL](http://developer.nvidia.com/cuda-toolkit-40) : headers et librairie requis (NVIDIA GPU Computing SDK\OpenCL)  
+[CUDA](http://developer.nvidia.com/cuda-downloads) : headers et librairie requis  
+[Visual Studio](http://www.visualstudio.com/) : Compiler requis  
+[Pandore](http://clouard.users.greyc.fr/Pandore/) : requis pour le prototype (Optionnel)
+
+Configurer le `MakefileConfig.inc` (Pandore peut être omis)  
+
 Instructions
 ---------------------
 
@@ -14,6 +38,8 @@ Instructions
  - `make run_tests_gpp` : Lance les tests de validité sur les images de sortie des différents algorithmes implémentés sur GPP.
  - `make run_sse` : Construit les images de sortie de chaque algorithme implémenté sur GPP avec extension SSE.
  - `make run_tests_sse` : Lance les tests de validité sur les images de sortie des différents algorithmes implémentés sur GPP avec extension SSE.
+ - `make run_tbb` : Construit les images de sortie de chaque algorithme implémenté sur GPP avec intelTBB.
+ - `make run_tests_tbb` : Lance les tests de validité sur les images de sortie des différents algorithmes implémentés sur GPP avec intelTBB.
  - `make run_cuda` : Construit les images de sortie de chaque algorithme implémenté avec CUDA.
  - `make run_tests_cuda` : Lance les tests de validité sur les images de sortie des différents algorithmes implémentés avec CUDA.
  - `make run_opencl` : Construit les images de sortie de chaque algorithme implémenté avec OpenCL.
